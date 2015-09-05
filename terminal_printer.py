@@ -1,12 +1,13 @@
 #!/usr/bin/python
-#coding=utf8
-import Image,os,ImageFont,ImageDraw
+# coding=utf8
+
+import Image, os, ImageFont, ImageDraw
 color = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
 import sys
 reload(sys)
 sys.setdefaultencoding("utf8")
 
-#use the absolute path if want to doploy it when you are not @ present directory
+# use the absolute path if want to doploy it when you are not @ present directory
 location = "./"
 
 
@@ -66,8 +67,9 @@ def preprocess(img_name, a_file=False):
     return img
 
 
-def drawer(text, fontsize, color="white", locate="/tmp/temp.png", Type="en", choice=0):
+def drawer(text, fontsize, color="white", Type="en", choice=0):
     text_len = len(text)
+    locate = "/tmp/temp_{}.png".format(os.popen("echo -n $USER").read())
     if Type == "en":
         font = ((location + "DejaVuSansMono-Bold.ttf", int(text_len * fontsize * 0.63), int(fontsize * 1.15)),
                 (location + "handstd_h.otf", int(text_len * fontsize * 0.55), int(fontsize)),
