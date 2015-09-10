@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # coding=utf8
 
 import Image, os, ImageFont, ImageDraw
@@ -8,7 +7,12 @@ reload(sys)
 sys.setdefaultencoding("utf8")
 
 # use the absolute path if want to doploy it when you are not @ present directory
-location = "./"
+location = __file__.replace(__file__.split('/')[-1], 'fonts/')
+
+
+class Printer:
+    def __init__(self):
+        pass
 
 
 def argSeeker(header):
@@ -97,7 +101,7 @@ def drawer(text, fontsize, color="white", Type="en", choice=0):
     return locate
 
 
-def main(text, Type="en", mode="text", color="\033[2;33m", Filter=15, font_choice='0'):
+def main_(text, Type="en", mode="text", color="\033[2;33m", Filter=15, font_choice='0'):
     text = u"{}".format(text)
     draw = drawer(text, 20, Type=Type, choice=int(font_choice))
     img = preprocess(draw)
@@ -137,8 +141,8 @@ def getType(text):
         return "en"
     return "other"
 
-if __name__ == '__main__':
 
+def main():
     default = {"text": "Flame",
                "Type": "en",
                "mode": "text",
@@ -185,9 +189,15 @@ if __name__ == '__main__':
             for i in mapDesc:
                 print "  " + i + " ==> " + mapDesc[i]
     if mark:
-        main(text=default["text"],
-             Type=default["Type"],
-             mode=default["mode"],
-             color=getColor(default["color"]),
-             Filter=default["Filter"],
-             font_choice=default["font"])
+        main_(text=default["text"],
+              Type=default["Type"],
+              mode=default["mode"],
+              color=getColor(default["color"]),
+              Filter=default["Filter"],
+              font_choice=default["font"])
+
+
+if __name__ == '__main__':
+    main()
+
+
