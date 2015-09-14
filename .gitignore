@@ -2,10 +2,10 @@
 .idea
 #packages
 
-*.egg
 *.egg-info
 dist
 build
+README
 eggs
 parts
 bin
