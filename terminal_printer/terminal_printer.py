@@ -9,7 +9,8 @@ reload(sys)
 sys.setdefaultencoding("utf8")
 
 # use the absolute path if want to doploy it when you are not @ present directory
-location = __file__.replace(__file__.split('/')[-1], 'fonts/')
+location = __file__.replace(__file__.split('/')[-1], '../data/')
+print location
 
 
 class Printer:
@@ -213,6 +214,8 @@ def drawer(text, fontsize, color="white", Type="en", choice=0):
     im = Image.new("1", (width, height), color)
     font = ImageFont.truetype(font, fontsize)
     draw = ImageDraw.Draw(im)
+    w, h = draw.textsize(text, font)
+    print w, h
     draw.text((0, 0), unicode(text), font=font)
     im.save(locate)
     return locate
