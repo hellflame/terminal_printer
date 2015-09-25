@@ -1,6 +1,6 @@
 # coding=utf8
 
-import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw
 from random import randrange
 from os import popen
 color = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
@@ -9,8 +9,7 @@ reload(sys)
 sys.setdefaultencoding("utf8")
 
 # use the absolute path if want to doploy it when you are not @ present directory
-location = __file__.replace(__file__.split('/')[-1], '../data/')
-print location
+location = __file__.replace(__file__.split('/')[-1], 'fonts/')
 
 
 class Printer:
@@ -214,8 +213,6 @@ def drawer(text, fontsize, color="white", Type="en", choice=0):
     im = Image.new("1", (width, height), color)
     font = ImageFont.truetype(font, fontsize)
     draw = ImageDraw.Draw(im)
-    w, h = draw.textsize(text, font)
-    print w, h
     draw.text((0, 0), unicode(text), font=font)
     im.save(locate)
     return locate
@@ -263,7 +260,7 @@ def getType(text):
 
 
 def main():
-    default = {"text": "Flame",
+    default = {"text": "HellFlame",
                "Type": "en",
                "mode": "text",
                "color": "31",
@@ -278,7 +275,7 @@ def main():
               "font": "-F",
               }
     mapDesc = {
-        "": " <== 直接输入图片文件名，则对图片进行字符化处理",
+        "": " 直接输入图片文件名，则对图片进行字符化处理",
         "-t": "设置将要处理的文本内容，默认为{}".format(default["text"]),
         "-T": "强制指定文本类型，默认为系统自动判别，若指定为英文，则 -T en，其他类型时输入其他",
         "-m": "设置输出模式, text表示文本输出；color表示按某种颜色输出，颜色值由-c指定；r_color表示使用随机颜色填充",
@@ -305,8 +302,15 @@ def main():
         elif args[1] == "--help" or args[1] == "-h":
             mark = False
             print "\n*******帮助模式*******\n"
+            print("deploy like this\n\n\tterminalprint target.jpg\n\tterminalprint -t testing")
+            print("\tterminalprint -t 中文 -m r_color")
+            print("\tterminalprint -t linux -m color -c 5")
+            print("\tterminalprint -t hellflame -m text -f 3")
+            print("\tterminalprint -t linux -F 2 -m r_color")
+            print("\n")
             for i in mapDesc:
-                print "  " + i + " ==> " + mapDesc[i]
+                print " \t" + i + " ==> " + mapDesc[i]
+            print("")
     if mark:
         main_(text=default["text"],
               Type=default["Type"],
