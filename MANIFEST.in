@@ -1,1 +1,8 @@
-recursive-include data *
+include terminal_printer/fonts/DejaVuSansMono-Bold.ttf
+include terminal_printer/fonts/fengyun.ttf
+include terminal_printer/fonts/handstd_h.otf
+include terminal_printer/fonts/huakangbold.otf
+include terminal_printer/fonts/letter.ttf
+include terminal_printer/fonts/shuyan.ttf
+
+include CHANGES.txt
