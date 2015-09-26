@@ -8,7 +8,7 @@ with open('README') as f:
 
 setup(
     name='TerminalPrinter',
-    version='0.9.4.6',
+    version='0.9.5.4',
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
     description="文字,字符,图片终端打印, print something in terminal",
     long_description=long_desc,
@@ -22,18 +22,21 @@ setup(
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 2.7'
     ],
-    include_pakage_data=True,
-    pakage_data={
-        'data': [
-            'data/DejaVuSansMono-Bold.ttf',
-            'data/fengyun.ttf',
-            'data/handstd_h.otf',
-            'data/huakangbold.otf',
-            'data/letter.ttf',
-            'data/shuyan.ttf'
+    include_package_data=True,
+    package_data={
+        'fonts': [
+            'fonts/DejaVuSansMono-Bold.ttf',
+            'fonts/fengyun.ttf',
+            'fonts/handstd_h.otf',
+            'fonts/huakangbold.otf',
+            'fonts/letter.ttf',
+            'fonts/shuyan.ttf'
         ]
     },
-    platforms="linux, Mac Os X",
+    install_requires=[
+        'Pillow'
+    ],
+    platforms="linux, Mac Os",
     entry_points={
         'console_scripts': [
             'terminalprint=terminal_printer.terminal_printer:main'
