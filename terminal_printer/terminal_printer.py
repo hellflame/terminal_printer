@@ -1,6 +1,6 @@
 # coding=utf8
 
-from PIL import Image, ImageFont, ImageDraw
+import Image, ImageFont, ImageDraw
 from random import randrange
 from os import popen
 color = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
