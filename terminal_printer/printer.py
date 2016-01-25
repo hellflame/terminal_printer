@@ -3,20 +3,17 @@
 
 from PIL import Image, ImageFont, ImageDraw
 from random import randrange
-from os import popen
+from os import popen, environ
 color = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
 import sys
 reload(sys)
 sys.setdefaultencoding("utf8")
 
-# use the absolute path if want to doploy it when you are not @ present directory
-location = __file__.replace(__file__.split('/')[-1], 'fonts/')
-
 
 class Printer:
     def __init__(self):
         self.filter_type = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
-        self.font_location = __file__.replace(__file__.split('/')[-1], 'fonts/')
+        self.font_location = environ['HOME'] + '/fonts/'
         self.img = None
 
     def make_char_img(self, filter_type=14):
@@ -131,6 +128,8 @@ class Printer:
     @staticmethod
     def get_color(tail):
         return "\033[3;{}m".format(tail)
+
+location = __file__.replace(__file__.split('/')[-1], 'fonts/')
 
 
 def preprocess(img_name, a_file=False):
