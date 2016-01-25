@@ -8,7 +8,7 @@ with open('README') as f:
 
 setup(
     name='TerminalPrinter',
-    version='0.9.5.4',
+    version='0.9.6',
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
     description="文字,字符,图片终端打印, print something in terminal",
     long_description=long_desc,
