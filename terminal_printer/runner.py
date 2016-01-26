@@ -1,6 +1,7 @@
 # coding=utf8
 from paramSeeker import ParamSeeker
-from terminal_printer import font_handle, Printer, font_check
+from printer import Printer
+from extras import font_handle, font_check
 from os import path
 
 seeker = ParamSeeker()
@@ -16,7 +17,7 @@ font_list = ['DejaVuSansMono-Bold.ttf',
 font_path = printer.font_location
 
 default = {"text": "HellFlame",
-           "Type": "en",
+           "Type": "",
            "mode": "text",
            "color": "31",
            "Filter": 14,
@@ -30,6 +31,7 @@ def init_program(wanted):
     check = font_handle(font_path, font_list, base_url='http://7xqh1q.dl1.z0.glb.clouddn.com/')
     if check:
         print(check)
+        print('here')
     exit(0)
 
 
@@ -76,8 +78,10 @@ def font_set(wanted):
 def pic_handle(wanted):
     if wanted == '.':
         if font_check(font_path, font_list):
-            return '请运行 -i or --init 初始化字体库\n或者-h or --help 帮助'
-        return ''
+            print('请运行 -i or --init 初始化字体库\n或者-h or --help 帮助')
+            return ''
+        else:
+            return ' '
     else:
         if path.exists(wanted):
             default['file'] = wanted
@@ -108,7 +112,12 @@ def runner():
         print(pic_str)
         return ''
 
-    printer.text_drawer(text=default['text'], lang=default['Type'], font_choice=default['font'])
+    if default['Type']:
+        auto = False
+    else:
+        auto = True
+
+    printer.text_drawer(text=default['text'], lang=default['Type'], font_choice=default['font'], auto=auto)
     printer.set_img(printer.tmp_pic)
     pic_str = printer.make_char_img(default['Filter'])
 

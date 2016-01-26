@@ -7,11 +7,18 @@ from os import popen, environ
 
 
 class Printer:
-    def __init__(self):
+    def __init__(self, w=0, h=0):
         self.filter_type = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
-        self.font_location = environ['HOME'] + '/fonts/'
+        self.font_location = environ['HOME'] + '/.terminal_fonts/'
         self.img = None
         self.tmp_pic = '/tmp/printer_{}.png'.format(environ['USER'])
+        if w and h:
+            self.console_w = w
+            self.console_h = h
+        else:
+            console = popen("stty size").read().split()
+            self.console_w = int(console[1])
+            self.console_h = int(console[0])
 
     def make_char_img(self, filter_type=14):
         if not self.img:
@@ -28,18 +35,20 @@ class Printer:
     def set_img(self, file_path, is_picture=False):
         img = Image.open(file_path)
         w, h = img.size
-        console = popen("stty size").read().split()
-        console_wid, console_hei = int(console[1]), int(console[0])
         if is_picture:
-            img = img.resize((console_wid, h))
+            img = img.resize((self.console_w, h))
         else:
-            img = img.resize((console_wid, console_hei))
+            img = img.resize((self.console_w, self.console_h))
         self.img = img.convert('L')
 
-    def text_drawer(self, text, lang, font_choice=0):
+    def text_drawer(self, text, lang, font_choice=0, auto=False):
         text_len = len(text)
         tmp_pic = self.tmp_pic
-        if lang == "en":
+        im = Image.new("1", (self.console_w, self.console_h), 'white')
+        draw = ImageDraw.Draw(im)
+        mark = False
+
+        if auto and self.simple_lang(text) == 'en':
             fontsize = 20
             font = ((self.font_location + "DejaVuSansMono-Bold.ttf", int(text_len * fontsize * 0.63), int(fontsize * 1.15)),
                     (self.font_location + "handstd_h.otf", int(text_len * fontsize * 0.55), int(fontsize)),
@@ -47,21 +56,29 @@ class Printer:
                     (self.font_location + "fengyun.ttf", int(text_len * fontsize * 0.68), int(fontsize * 1.3))
                     )
         else:
+            mark = True
             fontsize = 20
-            font = ((self.font_location + "letter.ttf", int(text_len * fontsize), int(fontsize * 1.1)),
-                    (self.font_location + "shuyan.ttf", int(text_len * fontsize * 1.05), int(fontsize * 1.2)),
-                    (self.font_location + "huakangbold.otf", int(text_len * fontsize), int(fontsize * 1.4)),
-                    (self.font_location + "fengyun.ttf", int(text_len * fontsize), int(fontsize * 1.4))
+            font = ((self.font_location + "letter.ttf", int(text_len * fontsize * 0.33), int(fontsize * 1.1)),
+                    (self.font_location + "shuyan.ttf", int(text_len * fontsize * 0.35), int(fontsize * 1.2)),
+                    (self.font_location + "huakangbold.otf", int(text_len * fontsize * 0.34), int(fontsize * 1.4)),
+                    (self.font_location + "fengyun.ttf", int(text_len * fontsize * 0.34), int(fontsize * 1.4))
                     )
         Max = 3
+        font_choice = int(font_choice)
         if 0 <= font_choice <= Max:
             font, width, height = font[font_choice]
         elif font_choice > Max:
             font, width, height = font[Max]
         else:
             font, width, height = font[0]
-        im = Image.new("1", (width, height), 'white')
+
         font = ImageFont.truetype(font, fontsize)
+        text_size = draw.textsize(text, font=font)
+        if mark:
+            im = im.resize((width, height))
+        else:
+            im = im.resize(text_size)
+
         draw = ImageDraw.Draw(im)
         draw.text((0, 0), unicode(text), font=font)
         im.save(tmp_pic)
@@ -100,6 +117,13 @@ class Printer:
         return result
 
     @staticmethod
+    def simple_lang(text):
+        for i in text:
+            if unichr(ord(i)) != i.decode('utf8', errors='ignore'):
+                return 'other'
+        return 'en'
+
+    @staticmethod
     def dye(string, color):
         return color + string + "\033[1;m"
 
@@ -124,5 +148,6 @@ class Printer:
     def get_color(tail):
         return "\033[3;{}m".format(tail)
 
-
+if __name__ == '__main__':
+    print Printer().getlang('linux中isfine么')
 
