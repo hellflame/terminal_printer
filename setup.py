@@ -12,27 +12,31 @@ setup(
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
     description="文字,字符,图片终端打印, print something in terminal",
     long_description=long_desc,
-    license='MIT',
+    license='Apache License',
     author='hellflame',
     author_email='hellflamedly@gmail.com',
     url='https://github.com/hellflame/terminal_printer',
     packages=find_packages(),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
+        'Environment :: Console',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: POSIX :: Linux',
+        'Topic :: Text Processing :: General'
     ],
-    include_package_data=True,
-    package_data={
-        'fonts': [
-            'fonts/DejaVuSansMono-Bold.ttf',
-            'fonts/fengyun.ttf',
-            'fonts/handstd_h.otf',
-            'fonts/huakangbold.otf',
-            'fonts/letter.ttf',
-            'fonts/shuyan.ttf'
-        ]
-    },
+    # include_package_data=True,
+    # package_data={
+    #    'fonts': [
+    #        'fonts/DejaVuSansMono-Bold.ttf',
+    #        'fonts/fengyun.ttf',
+    #        'fonts/handstd_h.otf',
+    #        'fonts/huakangbold.otf',
+    #        'fonts/letter.ttf',
+    #        'fonts/shuyan.ttf'
+    #    ]
+    # },
     install_requires=[
         'Pillow',
         'paramSeeker'
