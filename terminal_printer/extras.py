@@ -1,12 +1,18 @@
 from os.path import exists
+from os import makedirs
 from sys import version
 if version[0] == '2':
     from urllib2 import urlopen
+    import sys
+    reload(sys)
+    sys.setdefaultencoding("utf8")
 else:
     from urllib.request import urlopen
 
 
 def font_check(font_path, font_list):
+    if not exists(font_path):
+        makedirs(font_path)
     target = []
     for font in font_list:
         if not exists(font_path + '/{}'.format(font)):
