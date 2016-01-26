@@ -31,7 +31,6 @@ def init_program(wanted):
     check = font_handle(font_path, font_list, base_url='http://7xqh1q.dl1.z0.glb.clouddn.com/')
     if check:
         print(check)
-        print('here')
     exit(0)
 
 
@@ -81,7 +80,7 @@ def pic_handle(wanted):
             print('请运行 -i or --init 初始化字体库\n或者-h or --help 帮助')
             return ''
         else:
-            return ' '
+            return ''
     else:
         if path.exists(wanted):
             default['file'] = wanted
@@ -98,36 +97,26 @@ seeker.set_usage_desc("terminalprint -t 女王大人 -F 1 -m r_color")
 
 
 def runner():
-    seeker.run()
+    seeker.run(no_output=True)
     if default['file']:
-        printer.set_img(default['file'], is_picture=True)
+        printer.set_img(default['file'])
         pic_str = printer.make_char_img(filter_type=default['Filter'])
 
-        if default['mode'] == 'color':
-            print(printer.dye_all(pic_str, default['color']))
-            return ''
-        elif default['mode'] == 'r_color':
-            print(printer.dye_rand(pic_str))
-            return ''
-        print(pic_str)
-        return ''
-
-    if default['Type']:
-        auto = False
     else:
-        auto = True
-
-    printer.text_drawer(text=default['text'], lang=default['Type'], font_choice=default['font'], auto=auto)
-    printer.set_img(printer.tmp_pic)
-    pic_str = printer.make_char_img(default['Filter'])
+        if default['Type']:
+            auto = False
+        else:
+            auto = True
+        printer.text_drawer(text=default['text'], lang=default['Type'], font_choice=default['font'], auto=auto)
+        printer.set_img(printer.tmp_pic)
+        pic_str = printer.make_char_img(default['Filter'])
 
     if default['mode'] == 'color':
         print(printer.dye_all(pic_str, default['color']))
-        return ''
     elif default['mode'] == 'r_color':
         print(printer.dye_rand(pic_str))
-        return ''
-    print(pic_str)
+    else:
+        print(pic_str)
 
 
 if __name__ == '__main__':

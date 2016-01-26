@@ -32,13 +32,9 @@ class Printer:
             pic_str += '\n'
         return pic_str
 
-    def set_img(self, file_path, is_picture=False):
+    def set_img(self, file_path):
         img = Image.open(file_path)
-        w, h = img.size
-        if is_picture:
-            img = img.resize((self.console_w, h))
-        else:
-            img = img.resize((self.console_w, self.console_h))
+        img = img.resize((self.console_w, self.console_h))
         self.img = img.convert('L')
 
     def text_drawer(self, text, lang, font_choice=0, auto=False):
@@ -58,7 +54,7 @@ class Printer:
         else:
             mark = True
             fontsize = 20
-            font = ((self.font_location + "letter.ttf", int(text_len * fontsize * 0.33), int(fontsize * 1.1)),
+            font = ((self.font_location + "letter.ttf", int(text_len * fontsize * 0.32), int(fontsize * 1.1)),
                     (self.font_location + "shuyan.ttf", int(text_len * fontsize * 0.35), int(fontsize * 1.2)),
                     (self.font_location + "huakangbold.otf", int(text_len * fontsize * 0.34), int(fontsize * 1.4)),
                     (self.font_location + "fengyun.ttf", int(text_len * fontsize * 0.34), int(fontsize * 1.4))
@@ -148,6 +144,5 @@ class Printer:
     def get_color(tail):
         return "\033[3;{}m".format(tail)
 
-if __name__ == '__main__':
-    print Printer().getlang('linux中isfine么')
+
 

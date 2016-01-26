@@ -8,7 +8,7 @@ with open('README') as f:
 
 setup(
     name='TerminalPrinter',
-    version='1.0.1',
+    version='1.1.0',
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
     description="文字,字符,图片终端打印, print something in terminal",
     long_description=long_desc,
@@ -26,17 +26,6 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Topic :: Text Processing :: General'
     ],
-    # include_package_data=True,
-    # package_data={
-    #    'fonts': [
-    #        'fonts/DejaVuSansMono-Bold.ttf',
-    #        'fonts/fengyun.ttf',
-    #        'fonts/handstd_h.otf',
-    #        'fonts/huakangbold.otf',
-    #        'fonts/letter.ttf',
-    #        'fonts/shuyan.ttf'
-    #    ]
-    # },
     install_requires=[
         'Pillow',
         'paramSeeker'
