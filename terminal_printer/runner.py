@@ -23,7 +23,8 @@ default = {"text": "HellFlame",
            "Filter": 14,
            "font": 0,
            "file": '',
-           "force": False}
+           "force": False,
+           'init': False}
 
 
 @seeker.seek(param='--init', short='-i', is_mark=True, extra={'desc': 'download fonts and init program'})
@@ -78,6 +79,7 @@ def pic_handle(wanted):
     if wanted == '.':
         if font_check(font_path, font_list):
             print('请运行 -i or --init 初始化字体库\n或者-h or --help 帮助')
+            default['init'] = True
             return ''
         else:
             return ''
@@ -98,6 +100,9 @@ seeker.set_usage_desc("terminalprint -t 女王大人 -F 1 -m r_color")
 
 def runner():
     seeker.run(no_output=True)
+    if default['init']:
+        exit(0)
+
     if default['file']:
         printer.set_img(default['file'])
         pic_str = printer.make_char_img(filter_type=default['Filter'])

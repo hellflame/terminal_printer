@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='TerminalPrinter',
-    version='1.1.0',
+    version='1.1.4',
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
     description="文字,字符,图片终端打印, print something in terminal",
     license='Apache License',
@@ -30,7 +30,7 @@ setup(
     platforms="linux, Mac Os",
     entry_points={
         'console_scripts': [
-            'terminalprint=terminal_printer.terminal_printer:main'
+            'terminalprint=terminal_printer.runner:runner'
         ]
     }
 )
