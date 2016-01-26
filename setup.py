@@ -3,15 +3,12 @@ __author__ = 'hellflame'
 
 from setuptools import setup, find_packages
 
-with open('README') as f:
-    long_desc = f.read()
 
 setup(
     name='TerminalPrinter',
     version='1.1.0',
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
     description="文字,字符,图片终端打印, print something in terminal",
-    long_description=long_desc,
     license='Apache License',
     author='hellflame',
     author_email='hellflamedly@gmail.com',
