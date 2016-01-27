@@ -120,17 +120,8 @@ class Printer:
         return 'en'
 
     @staticmethod
-    def dye(string, color):
-        return color + string + "\033[1;m"
-
-    def dye_all(self, string, color):
-        temp = ""
-        str_list = string.split("\n")
-        for i in str_list:
-            temp += self.dye(i, color)
-            if str_list.index(i) != 1:
-                temp += "\n"
-        return temp
+    def dye_all(string, color):
+        return '\033[01;{}m'.format(color) + string + '\033[1;m'
 
     @staticmethod
     def dye_rand(string):

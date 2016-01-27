@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='TerminalPrinter',
-    version='1.1.4',
+    version='1.1.5',
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
     description="文字,字符,图片终端打印, print something in terminal",
     license='Apache License',
