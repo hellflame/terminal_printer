@@ -1,4 +1,3 @@
-#!/bin/bash
 # coding=utf8
 
 from PIL import Image, ImageFont, ImageDraw
