@@ -1,5 +1,5 @@
 from os.path import exists
-from os import makedirs
+from os import makedirs, removedirs, listdir, unlink
 from sys import version
 if version[0] == '2':
     from urllib2 import urlopen
@@ -28,12 +28,15 @@ def font_downloader(base_url, font_name, font_path):
 
 def font_handle(font_path, font_list, base_url):
     target = font_check(font_path, font_list)
-    if target:
-        for font in target:
-            print(font + ' is downloading...')
-            font_downloader(base_url, font, font_path)
-            print(font + ' downloaded~~')
-        return None
-    print('all font is downloaded~~')
+    if not target:
+        print("now delete the old font files\nPlease rerun this command")
+        for i in listdir(font_path):
+            unlink(font_path + '/' + i)
+        removedirs(font_path)
+
+    for font in target:
+        print(font + ' is downloading...')
+        font_downloader(base_url, font, font_path)
+        print(font + ' downloaded~~')
 
 
