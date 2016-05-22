@@ -2,15 +2,17 @@
 
 from PIL import Image, ImageFont, ImageDraw
 from random import randrange
-from os import popen, environ
+from os import popen, path
+import tempfile
+import getpass
 
 
 class Printer:
     def __init__(self, w=0, h=0):
         self.filter_type = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
-        self.font_location = environ['HOME'] + '/.terminal_fonts/'
+        self.font_location = path.expanduser('~') + '/.terminal_fonts/'
         self.img = None
-        self.tmp_pic = '/tmp/printer_{}.png'.format(environ['USER'])
+        self.tmp_pic = tempfile.gettempdir() + '/printer_{}.png'.format(getpass.getuser())
         if w and h:
             self.console_w = w
             self.console_h = h
