@@ -1,5 +1,5 @@
 __author__ = 'hellflame'
 
-from .printer import Printer
-from .extras import font_handle, font_check
+from .painter import Printer
+from .resource import font_handle, font_check
 
