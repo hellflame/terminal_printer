@@ -1,10 +1,8 @@
 # coding=utf8
-from paramSeeker import ParamSeeker
 from printer import Printer
 from extras import font_handle, font_check
 from os import path
 
-seeker = ParamSeeker()
 printer = Printer()
 
 font_list = ['DejaVuSansMono-Bold.ttf',

@@ -24,13 +24,11 @@ setup(
         'Topic :: Text Processing :: General'
     ],
     install_requires=[
-        'Pillow',
-        'paramSeeker'
+        'Pillow'
     ],
-    platforms="linux, Mac Os",
     entry_points={
         'console_scripts': [
-            'terminalprint=terminal_printer.runner:runner'
+            'terminalprint=printer.runner:runner'
         ]
     }
 )
