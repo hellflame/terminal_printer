@@ -6,7 +6,6 @@ import shutil
 from os.path import exists, join
 if sys.version[0] == '2':
     from urllib2 import urlopen
-    import sys
     reload(sys)
     sys.setdefaultencoding("utf8")
 else:

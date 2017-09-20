@@ -1,13 +1,20 @@
 # coding=utf8
-
+from __future__ import print_function
 from PIL import Image, ImageFont, ImageDraw
 from random import randrange
 from os import popen, path
 import tempfile
 import getpass
 
+FONT_LIST = ['DejaVuSansMono-Bold.ttf',
+             'handstd_h.otf',
+             'fengyun.ttf',
+             'huakangbold.otf',
+             'letter.ttf',
+             'shuyan.ttf']
 
-class Printer:
+
+class Printer(object):
     def __init__(self, w=0, h=0):
         self.filter_type = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
         self.font_location = path.expanduser('~') + '/.terminal_fonts/'

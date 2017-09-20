@@ -1,18 +1,10 @@
 # coding=utf8
+from __future__ import print_function
+import argparse
 from painter import Printer
 from resource import font_handle, missing_font
-from os import path
 
 printer = Printer()
-
-font_list = ['DejaVuSansMono-Bold.ttf',
-             'handstd_h.otf',
-             'fengyun.ttf',
-             'huakangbold.otf',
-             'letter.ttf',
-             'shuyan.ttf']
-
-font_path = printer.font_location
 
 default = {"text": "HellFlame",
            "Type": "",
