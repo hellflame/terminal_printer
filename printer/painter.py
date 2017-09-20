@@ -3,8 +3,11 @@ from __future__ import print_function
 from PIL import Image, ImageFont, ImageDraw
 from random import randrange
 from os import popen, path
+import string
 import tempfile
 import getpass
+
+__all__ = ['Printer']
 
 FONT_LIST = ['DejaVuSansMono-Bold.ttf',
              'handstd_h.otf',
@@ -13,20 +16,25 @@ FONT_LIST = ['DejaVuSansMono-Bold.ttf',
              'letter.ttf',
              'shuyan.ttf']
 
+FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
+PIC_TMP = path.join(tempfile.gettempdir(), "printer_{}.png".format(getpass.getuser()))
+MESS_FILTERS = string.digits + string.ascii_letters + string.punctuation
+
 
 class Printer(object):
     def __init__(self, w=0, h=0):
-        self.filter_type = '.~-_+*^?/%$!@( #&`\\)|1234567890abcdefghijklmnopqrstuvwxyz'
-        self.font_location = path.expanduser('~') + '/.terminal_fonts/'
+        self.filter_type = MESS_FILTERS
         self.img = None
-        self.tmp_pic = tempfile.gettempdir() + '/printer_{}.png'.format(getpass.getuser())
+        self.font_location = FONT_DIR
+        self.tmp_pic = PIC_TMP
         if w and h:
             self.console_w = w
             self.console_h = h
         else:
-            console = popen("stty size").read().split()
-            self.console_w = int(console[1])
-            self.console_h = int(console[0])
+            try:
+                self.console_h, self.console_w = [int(s) for s in popen("stty size").read().split()]
+            except:
+                self.console_h, self.console_w = 30, 20
 
     def make_char_img(self, filter_type=14):
         if not self.img:
@@ -128,13 +136,13 @@ class Printer(object):
         return 'en'
 
     @staticmethod
-    def dye_all(string, color):
-        return '\033[01;{}m'.format(color) + string + '\033[1;m'
+    def dye_all(s, color):
+        return '\033[01;{}m'.format(color) + s + '\033[1;m'
 
     @staticmethod
-    def dye_rand(string):
+    def dye_rand(s):
         temp = ""
-        for i in string:
+        for i in s:
             if i != "\n":
                 temp += "\033[{};{}m{}\033[1;m".format(randrange(1, 4), randrange(30, 40), i)
         return temp
