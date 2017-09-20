@@ -1,6 +1,6 @@
 # coding=utf8
 from painter import Printer
-from resource import font_handle, font_check
+from resource import font_handle, missing_font
 from os import path
 
 printer = Printer()
@@ -75,7 +75,7 @@ def font_set(wanted):
 @seeker.seek(extra={'default': '.'})
 def pic_handle(wanted):
     if wanted == '.':
-        if font_check(font_path, font_list):
+        if missing_font(font_path, font_list):
             print('请运行 -i or --init 初始化字体库\n或者-h or --help 帮助')
             default['init'] = True
             return ''

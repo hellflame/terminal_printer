@@ -1,7 +1,10 @@
-from os.path import exists
-from os import makedirs, removedirs, listdir, unlink
-from sys import version
-if version[0] == '2':
+# coding=utf8
+from __future__ import print_function
+import os
+import sys
+import shutil
+from os.path import exists, join
+if sys.version[0] == '2':
     from urllib2 import urlopen
     import sys
     reload(sys)
@@ -10,33 +13,50 @@ else:
     from urllib.request import urlopen
 
 
-def font_check(font_path, font_list):
-    if not exists(font_path):
-        makedirs(font_path)
-    target = []
-    for font in font_list:
-        if not exists(font_path + '/{}'.format(font)):
-            target.append(font)
-    return target
+def missing_font(font_path, font_list):
+    """
+    查找缺失字体
+    :param font_path:
+    :param font_list:
+    :return:
+    """
+    return [f for f in font_list if not exists(join(font_path, f))]
 
 
 def font_downloader(base_url, font_name, font_path):
-    with open(font_path + '/{}'.format(font_name), 'w') as f_handle:
+    """
+    字体下载
+    :param base_url:
+    :param font_name:
+    :param font_path:
+    :return:
+    """
+    with open(join(font_path, font_name), 'w') as f_handle:
         handle = urlopen(base_url + font_name)
         f_handle.write(handle.read())
 
 
 def font_handle(font_path, font_list, base_url):
-    target = font_check(font_path, font_list)
+    """
+    字体下载管理，如果没有缺失字体依然执行，将重新下载所有字体
+    :param font_path:
+    :param font_list:
+    :param base_url:
+    :return:
+    """
+    target = missing_font(font_path, font_list)
     if not target:
-        print("now delete the old font files\nPlease rerun this command")
-        for i in listdir(font_path):
-            unlink(font_path + '/' + i)
-        removedirs(font_path)
+        # 删除原有字体目录
+        shutil.rmtree(font_path)
+        target = font_list
 
-    for font in target:
-        print(font + ' is downloading...')
+    if not exists(font_path):
+        # 创建字体目录
+        os.makedirs(font_path)
+
+    for index, font in enumerate(target):
+        print("downloading", '{}/{}'.format(index + 1, len(target)), font)
         font_downloader(base_url, font, font_path)
-        print(font + ' downloaded~~')
-
+        sys.stdout.write("\033[F")
+    print()
 
