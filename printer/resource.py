@@ -45,7 +45,14 @@ def font_handle(font_path, font_list, base_url):
     """
     target = missing_font(font_path, font_list)
     if not target:
-        # 删除原有字体目录
+        # 如果字体完整依然执行初始化，则提示删除原有字体目录
+        prompt = "当前字体数据完整，是否继续初始化? y/n "
+        if sys.version[0] == 2:
+            if not raw_input(prompt).lower().startswith('y'):
+                return False
+        else:
+            if not input(prompt).lower().startswith('y'):
+                return False
         shutil.rmtree(font_path)
         target = font_list
 
