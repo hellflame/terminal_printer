@@ -2,17 +2,17 @@
 __author__ = 'hellflame'
 
 from setuptools import setup, find_packages
-
+from printer.painter import __version__, __author__, __url__
 
 setup(
     name='TerminalPrinter',
-    version='1.2.0',
+    version=__version__,
     keywords=('text printer', 'picture printer', 'picture in terminal', 'print picture in terminal'),
-    description="文字,字符,图片终端打印, print something in terminal",
+    description="terminal printer",
     license='Apache License',
-    author='hellflame',
+    author=__author__,
     author_email='hellflamedly@gmail.com',
-    url='https://github.com/hellflame/terminal_printer',
+    url=__url__,
     packages=find_packages(),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -28,7 +28,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'terminalprint=printer.runner:runner'
+            'terminalprint=printer.runner:run'
         ]
     }
 )
