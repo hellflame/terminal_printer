@@ -37,7 +37,7 @@ class Printer(object):
             try:
                 self.console_h, self.console_w = [int(s) for s in popen("stty size").read().split()]
             except:
-                self.console_h, self.console_w = 30, 20
+                self.console_h, self.console_w = 30, 50
 
     def make_char_img(self, filter_type=14):
         if not self.img:
