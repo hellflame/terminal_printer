@@ -1,5 +1,3 @@
-(A) 取消 paramseeker 依赖, 使用 argparse 代替
-(B) 代码清理
 (B) 代码优化，bug修复
 (C) gif动图支持
 (D) README记录

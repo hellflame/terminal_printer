@@ -1,9 +1,8 @@
 # coding=utf8
 from __future__ import print_function
-from painter import Printer, FONT_LIST, FONT_DIR, __version__, __url__
+from painter import FONT_LIST, FONT_DIR, MESS_FILTERS, __version__, __url__
 from resource import font_handle, missing_font
 
-printer = Printer()
 
 default = {"text": "HellFlame",
            "Type": "",
@@ -20,16 +19,17 @@ def parser():
     import argparse
     parse = argparse.ArgumentParser(description="Terminal Printer",
                                     formatter_class=argparse.RawTextHelpFormatter,
-                                    epilog="初次使用，需要初始化字体下载，"
-                                           "执行 terminalprint -i 初始化，"
-                                           "更多帮助信息请访问: " + __url__)
+                                    epilog="初次使用，需要初始化字体下载"
+                                           "\r\n执行 terminalprint -i 初始化"
+                                           "\r\n更多帮助信息请访问: " + __url__)
     parse.add_argument("-i", "--init", action="store_true", help="初始化程序，下载字体")
     parse.add_argument("-t", '--text', default="HellFlame", help="设置将要处理的文本内容，默认为 HellFlame")
-    parse.add_argument("-T", '--type', choices=('en', 'cn'), help="指定文本类型")
-    parse.add_argument("-m", '--mode', choices=('text', 'color', 'r_color'), help="设置输出模式")
-    parse.add_argument("-c", '--color', type=int, choices=range(30, 51), help="设置颜色")
-    parse.add_argument("-f", '--filter', type=int, choices=range(1, 57), help="设置打印填充方式")
-    parse.add_argument("-F", '--font', help="设置书写字体")
+    parse.add_argument("-l", '--lang', metavar="l", choices=('en', 'cn'), help="指定语种")
+    parse.add_argument("-m", '--mode', metavar="m", choices=('text', 'color', 'r_color'), help="设置输出模式")
+    parse.add_argument("-kc", '--keep-color', action="store_true", help="恢复原图颜色(若指定图)")
+    parse.add_argument("-c", '--color', type=int, metavar="i", choices=range(30, 51), help="设置颜色")
+    parse.add_argument("-f", '--filter', type=int, metavar="i", choices=range(1, len(MESS_FILTERS) - 1), help="设置打印填充方式")
+    parse.add_argument("-F", '--font', type=int, metavar="i", help="设置书写字体")
     parse.add_argument("-v", '--version', action="store_true", help="输出版本信息")
 
     # 可选的位置参数
@@ -42,9 +42,10 @@ def command(args, parse):
     if args.init:
         font_handle(FONT_DIR, FONT_LIST, 'http://7xqh1q.dl1.z0.glb.clouddn.com/')
     elif args.version:
-        print("TerminalPrinter v.", __version__)
+        print("TerminalPrinter v." + __version__)
     else:
-        parse.print_help()
+        printer = Printer()
+
 
 
 def run():

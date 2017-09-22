@@ -3,6 +3,7 @@ from __future__ import print_function
 from PIL import Image, ImageFont, ImageDraw
 from random import randrange
 from os import popen, path
+import sys
 import string
 import tempfile
 import getpass
@@ -23,136 +24,98 @@ FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
 PIC_TMP = path.join(tempfile.gettempdir(), "printer_{}.png".format(getpass.getuser()))
 MESS_FILTERS = string.digits + string.ascii_letters + string.punctuation
 
+if sys.version_info.major == 2:
+    reload(sys)
+    sys.setdefaultencoding('utf8')
 
-class Printer(object):
-    def __init__(self, w=0, h=0):
-        self.filter_type = MESS_FILTERS
-        self.img = None
-        self.font_location = FONT_DIR
-        self.tmp_pic = PIC_TMP
-        if w and h:
-            self.console_w = w
-            self.console_h = h
-        else:
-            try:
-                self.console_h, self.console_w = [int(s) for s in popen("stty size").read().split()]
-            except:
-                self.console_h, self.console_w = 30, 50
-
-    def make_char_img(self, filter_type=14):
-        if not self.img:
-            return False
-        pix = self.img.load()
-        pic_str = ''
-        width, height = self.img.size
-        for h in xrange(height):
-            for w in xrange(width):
-                pic_str += self.filter_type[int(pix[w, h]) * int(filter_type) / 255]
-            pic_str += '\n'
-        return pic_str
-
-    def set_img(self, file_path):
-        img = Image.open(file_path)
-        img = img.resize((self.console_w, self.console_h))
-        self.img = img.convert('L')
-
-    def text_drawer(self, text, lang, font_choice=0, auto=False):
-        text_len = len(text)
-        tmp_pic = self.tmp_pic
-        im = Image.new("1", (self.console_w, self.console_h), 'white')
-        draw = ImageDraw.Draw(im)
-        mark = False
-
-        if auto and self.simple_lang(text) == 'en':
-            fontsize = 20
-            font = ((self.font_location + "DejaVuSansMono-Bold.ttf", int(text_len * fontsize * 0.63), int(fontsize * 1.15)),
-                    (self.font_location + "handstd_h.otf", int(text_len * fontsize * 0.55), int(fontsize)),
-                    (self.font_location + "shuyan.ttf", int(text_len * fontsize * 0.5), int(fontsize * 1.2)),
-                    (self.font_location + "fengyun.ttf", int(text_len * fontsize * 0.68), int(fontsize * 1.3))
-                    )
-        else:
-            mark = True
-            fontsize = 20
-            font = ((self.font_location + "letter.ttf", int(text_len * fontsize * 0.32), int(fontsize * 1.1)),
-                    (self.font_location + "shuyan.ttf", int(text_len * fontsize * 0.35), int(fontsize * 1.2)),
-                    (self.font_location + "huakangbold.otf", int(text_len * fontsize * 0.34), int(fontsize * 1.4)),
-                    (self.font_location + "fengyun.ttf", int(text_len * fontsize * 0.34), int(fontsize * 1.4))
-                    )
-        Max = 3
-        font_choice = int(font_choice)
-        if 0 <= font_choice <= Max:
-            font, width, height = font[font_choice]
-        elif font_choice > Max:
-            font, width, height = font[Max]
-        else:
-            font, width, height = font[0]
-
-        font = ImageFont.truetype(font, fontsize)
-        text_size = draw.textsize(text, font=font)
-        if mark:
-            im = im.resize((width, height))
-        else:
-            im = im.resize(text_size)
-
-        draw = ImageDraw.Draw(im)
-        draw.text((0, 0), unicode(text), font=font)
-        im.save(tmp_pic)
-
-    @staticmethod
-    def getlang(text):
-        lang_list = []
-        for i in text:
-            if unichr(ord(i)) == i.decode('utf8', errors='ignore'):
-                lang_list.append({
-                    'lang': 'en',
-                    'content': i
-                })
-            else:
-                lang_list.append({
-                    'lang': 'other',
-                    'content': i
-                })
-        char_count = len(lang_list)
-        if char_count == 1:
-            return lang_list
-        result = []
-        mark = 0
-        for i in range(char_count)[1:]:
-            if lang_list[i - 1]['lang'] == lang_list[i]['lang']:
-                if i == 1:
-                    result.append(lang_list[i - 1])
-                    result[mark]['content'] += lang_list[i]['content']
-                else:
-                    result[mark]['content'] += lang_list[i]['content']
-            else:
-                if i == 1:
-                    result.append(lang_list[i - 1])
-                result.append(lang_list[i])
-                mark += 1
-        return result
-
-    @staticmethod
-    def simple_lang(text):
-        for i in text:
-            if unichr(ord(i)) != i.decode('utf8', errors='ignore'):
-                return 'other'
-        return 'en'
-
-    @staticmethod
-    def dye_all(s, color):
-        return '\033[01;{}m'.format(color) + s + '\033[1;m'
-
-    @staticmethod
-    def dye_rand(s):
-        temp = ""
-        for i in s:
-            if i != "\n":
-                temp += "\033[{};{}m{}\033[1;m".format(randrange(1, 4), randrange(30, 40), i)
-        return temp
-
-    @staticmethod
-    def get_color(tail):
-        return "\033[3;{}m".format(tail)
+try:
+    DEFAULT_SIZE = [int(s) for s in popen("stty size").read().split()]
+except:
+    DEFAULT_SIZE = 30, 50  # height, width
 
 
+def make_char_img(img, filter_type=14):
+    if not img:
+        return False
+    pix = img.load()
+    width, height = img.size
+    return ''.join(['\n'.join([MESS_FILTERS[int(pix[w, h]) * int(filter_type) / 255]
+                               for w in range(width)])
+                    for h in range(height)])
+
+
+def get_gray_img(file_path, width=None, height=None):
+    img = Image.open(file_path)
+    if width is not None and height is not None:
+        img = img.resize((width, height))
+    img = img.convert('L')
+    img.save(PIC_TMP)
+
+
+def get_colored_img(file_path, width, height):
+    img = Image.open(file_path)
+    if width is not None and height is not None:
+        img = img.resize((width, height))
+    img.save(PIC_TMP)
+
+
+def text_drawer(text, width, height, font_choice=0):
+    """
+    将文字书写在画布上
+    :param text:
+    :param width:
+    :param height:
+    :param font_choice:
+    :return:
+    """
+    im = Image.new("1", (width, height), 'white')
+    draw = ImageDraw.Draw(im)
+    size = 20
+
+    def font_location(f):
+        return path.join(FONT_DIR, f)
+
+    Max = 3
+    if 0 <= font_choice <= Max:
+        font, width, height = font[font_choice]
+    elif font_choice > Max:
+        font, width, height = font[Max]
+    else:
+        font, width, height = font[0]
+
+    font = font_location('shuyan.ttf')
+    font = ImageFont.truetype(font, size)
+    text_size = draw.textsize(unicode(text), font=font)
+    print(text_size, width, height)
+    im = im.resize(text_size)
+
+    draw = ImageDraw.Draw(im)
+    draw.text((0, 0), unicode(text), font=font)
+    im.save(PIC_TMP)
+    print(PIC_TMP)
+
+
+def simple_lang(text):
+    for i in text:
+        if unichr(ord(i)) != i.decode('utf8', errors='ignore'):
+            return 'other'
+    return 'en'
+
+
+def dye_all(raw_img_string, color):
+    return '\033[01;{}m'.format(color) + raw_img_string + '\033[1;m'
+
+
+def dye_rand(raw_img_string):
+    temp = ""
+    for i in raw_img_string:
+        if i != "\n":
+            temp += "\033[{};{}m{}\033[1;m".format(randrange(1, 4), randrange(30, 40), i)
+
+    return temp
+
+
+if __name__ == '__main__':
+    # text_drawer('中文好吧，，貌似是有一点点问题的样子', 200, 100)
+    get_colored_img("/Users/hellflame/Downloads/lifecycle.png", 6,6)
 
