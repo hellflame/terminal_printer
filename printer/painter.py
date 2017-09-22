@@ -115,7 +115,15 @@ def dye_rand(raw_img_string):
     return temp
 
 
+def test():
+    # 可以看到在终端中显示出来宽度差异很大，不能直接打印在终端中
+    import random
+    for i in range(10):
+        print(''.join([random.choice(u"◾▒░▓▊") for j in range(30)]) + '|')
+
+
 if __name__ == '__main__':
     # text_drawer('中文好吧，，貌似是有一点点问题的样子', 200, 100)
-    get_colored_img("/Users/hellflame/Downloads/lifecycle.png", 6,6)
+    test()
+    # get_colored_img("/Users/hellflame/Downloads/lifecycle.png", 6,6)
 
