@@ -4,12 +4,10 @@ from PIL import Image, ImageFont, ImageDraw
 from os import popen, path
 import sys
 import random
-import getpass
-import tempfile
 
 __all__ = ['Printer']
 __author__ = 'hellflame'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __url__ = 'https://github.com/hellflame/terminal_printer'
 
 FONT_LIST = ['shuyan.ttf',
@@ -17,8 +15,6 @@ FONT_LIST = ['shuyan.ttf',
              'Haibaoyuanyuan.ttf']
 
 FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
-PIC_TMP = path.join(tempfile.gettempdir(), "printer_{}.png".format(getpass.getuser()))
-# print(PIC_TMP)
 MESS_FILTERS = ''.join([unichr(i) for i in range(32, 256)])
 
 
@@ -37,13 +33,15 @@ def make_terminal_img(img, filter_type=None, width=None,
                       keep_ratio=False, gray=True):
     """
     在终端输出字符图片
-    :param img:
-    :param filter_type:
-    :param width:
-    :param height:
-    :param dye:
-    :param reverse:
-    :return:
+    :param img: 图像
+    :param filter_type: 填充字符
+    :param width: 输出宽度
+    :param height: 输出高度
+    :param dye: 上色
+    :param reverse: 是否反色
+    :param keep_ratio: 是否保持比例
+    :param gray: 如果处理图片，是否转换为灰度图
+    :return: 图像字符
     """
     if not img:
         return False
@@ -51,7 +49,7 @@ def make_terminal_img(img, filter_type=None, width=None,
         if width is None or height is None:
             img = img.resize(DEFAULT_SIZE)
         else:
-            img = img.resize((height, width))
+            img = img.resize((width, height))
     else:
         size = img.size
         if width is None or height is None:
@@ -63,7 +61,7 @@ def make_terminal_img(img, filter_type=None, width=None,
     width, height = img.size
     pix = img.load()
 
-    img.save("./t.png")
+    # img.save("./t.png")
 
     if gray:
         def render_pix(x, y):
@@ -77,17 +75,16 @@ def make_terminal_img(img, filter_type=None, width=None,
                 return MESS_FILTERS[pix[x, y] * (len(MESS_FILTERS) - 1) // 255]
     else:
         def render_pix(x, y):
-            print(pix[x, y])
-            return 'a'
+            # 如果这里也用随机填充的话，会显得很乱
+            return '\033[0;38;2;%s;%s;%sm' % pix[x, y] + MESS_FILTERS[filter_type]
 
     if type(dye) is int:
         # 特定颜色绘制
         result = '\033[01;{}m'.format(dye) + '\n'.join([''.join([render_pix(w, h) for w in range(width)])
-                                                        for h in range(height)]) \
-               + '\033[1;m'
+                                                        for h in range(height)])
     elif type(dye) is str:
         # 随机颜色绘制
-        result = '\n'.join([''.join(["\033[{};{}m{}\033[1;m".format(random.randrange(1, 4),
+        result = '\n'.join([''.join(["\033[{};{}m{}".format(random.randrange(1, 4),
                                                                     random.randrange(30, 40),
                                                                     render_pix(w, h))
                                      for w in range(width)])
@@ -99,7 +96,7 @@ def make_terminal_img(img, filter_type=None, width=None,
                                      for w in range(width)])
                             for h in range(height)])
     img.close()
-    return result
+    return result + '\033[m'
 
 
 def get_img(file_path, gray=False):
@@ -109,10 +106,14 @@ def get_img(file_path, gray=False):
     :param gray:
     :return:
     """
-    img = Image.open(file_path)
-    if gray:
-        img = img.convert('L')
-    return img
+    try:
+        img = Image.open(file_path)
+        if gray:
+            img = img.convert('L')
+        return img
+    except Exception:
+        print("不支持的图片格式")
+        return None
 
 
 def text_drawer(text, fonts=None):
@@ -135,7 +136,12 @@ def text_drawer(text, fonts=None):
     try:
         font = ImageFont.truetype(font, 20)
     except:
-        font = ImageFont.truetype(path.join(FONT_DIR, FONT_LIST[0]), 20)
+        target = path.join(FONT_DIR, FONT_LIST[0])
+        if path.exists(target):
+            font = ImageFont.truetype(target, 20)
+        else:
+            print("需要先初始化字体")
+            return None
 
     text_size = draw.textsize(unicode(text), font=font)
     im = im.resize(text_size)
@@ -148,7 +154,7 @@ def text_drawer(text, fonts=None):
 if __name__ == '__main__':
     a = text_drawer('flame中文')
     a = get_img("/Users/hellflame/Pictures/EvJIITe.jpg")
-    result = make_terminal_img(a, dye=34, filter_type=5, gray=False)
+    result = make_terminal_img(a, dye=34, filter_type=73, gray=False)
     print(result)
     # print(ret_type('file')(text_drawer)("中文测试", 200, 100))
     # test()
