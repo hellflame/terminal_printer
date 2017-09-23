@@ -4,17 +4,6 @@ from painter import FONT_LIST, FONT_DIR, MESS_FILTERS, __version__, __url__
 from resource import font_handle, missing_font
 
 
-default = {"text": "HellFlame",
-           "Type": "",
-           "mode": "text",
-           "color": "31",
-           "Filter": 14,
-           "font": 0,
-           "file": '',
-           "force": False,
-           'init': False}
-
-
 def parser():
     import argparse
     parse = argparse.ArgumentParser(description="Terminal Printer",
@@ -27,9 +16,14 @@ def parser():
     parse.add_argument("-l", '--lang', metavar="l", choices=('en', 'cn'), help="指定语种")
     parse.add_argument("-m", '--mode', metavar="m", choices=('text', 'color', 'r_color'), help="设置输出模式")
     parse.add_argument("-kc", '--keep-color', action="store_true", help="恢复原图颜色(若指定图)")
+    parse.add_argument("-kr", '--keep-ratio', action="store_true", help="保持图片比例")
     parse.add_argument("-c", '--color', type=int, metavar="i", choices=range(30, 51), help="设置颜色")
-    parse.add_argument("-f", '--filter', type=int, metavar="i", choices=range(1, len(MESS_FILTERS) - 1), help="设置打印填充方式")
-    parse.add_argument("-F", '--font', type=int, metavar="i", help="设置书写字体")
+    parse.add_argument("-f", '--filter', type=int, metavar="i", default=14, choices=range(1, len(MESS_FILTERS)),
+                       help="设置打印填充方式")
+    parse.add_argument("-o", '--out', help="输出转换后的图片")
+    parse.add_argument("--width", type=int, help="设置输出宽度")
+    parse.add_argument("--height", type=int, help="设置输出高度")
+    parse.add_argument("-F", '--font', metavar="path", help="设置书写字体")
     parse.add_argument("-v", '--version', action="store_true", help="输出版本信息")
 
     # 可选的位置参数
@@ -44,7 +38,7 @@ def command(args, parse):
     elif args.version:
         print("TerminalPrinter v." + __version__)
     else:
-        printer = Printer()
+        pass
 
 
 

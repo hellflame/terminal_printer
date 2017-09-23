@@ -1,129 +1,156 @@
 # coding=utf8
 from __future__ import print_function
 from PIL import Image, ImageFont, ImageDraw
-from random import randrange
 from os import popen, path
 import sys
-import string
-import tempfile
+import random
 import getpass
+import tempfile
 
 __all__ = ['Printer']
 __author__ = 'hellflame'
 __version__ = '1.2.0'
 __url__ = 'https://github.com/hellflame/terminal_printer'
 
-FONT_LIST = ['DejaVuSansMono-Bold.ttf',
-             'handstd_h.otf',
-             'fengyun.ttf',
-             'huakangbold.otf',
+FONT_LIST = ['shuyan.ttf',
              'letter.ttf',
-             'shuyan.ttf']
+             'Haibaoyuanyuan.ttf']
 
 FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
 PIC_TMP = path.join(tempfile.gettempdir(), "printer_{}.png".format(getpass.getuser()))
-MESS_FILTERS = string.digits + string.ascii_letters + string.punctuation
+# print(PIC_TMP)
+MESS_FILTERS = ''.join([unichr(i) for i in range(32, 256)])
+
 
 if sys.version_info.major == 2:
     reload(sys)
     sys.setdefaultencoding('utf8')
 
 try:
-    DEFAULT_SIZE = [int(s) for s in popen("stty size").read().split()]
+    DEFAULT_SIZE = tuple(reversed([int(s) for s in popen("stty size").read().split()]))
 except:
-    DEFAULT_SIZE = 30, 50  # height, width
+    DEFAULT_SIZE = 50, 30  # width, height
 
 
-def make_char_img(img, filter_type=14):
+def make_terminal_img(img, filter_type=None, width=None,
+                      height=None, dye=None, reverse=False,
+                      keep_ratio=False, gray=True):
+    """
+    在终端输出字符图片
+    :param img:
+    :param filter_type:
+    :param width:
+    :param height:
+    :param dye:
+    :param reverse:
+    :return:
+    """
     if not img:
         return False
-    pix = img.load()
+    if not keep_ratio:
+        if width is None or height is None:
+            img = img.resize(DEFAULT_SIZE)
+        else:
+            img = img.resize((height, width))
+    else:
+        size = img.size
+        if width is None or height is None:
+            ratio = min(float(DEFAULT_SIZE[0]) / size[0], float(DEFAULT_SIZE[1]) / size[1])
+            img = img.resize((int(size[0] * ratio), int(size[1] * ratio)))
+        else:
+            ratio = min(float(width) / size[0], float(height) / size[1])
+            img = img.resize((int(size[0] * ratio), int(size[1] * ratio)))
     width, height = img.size
-    return ''.join(['\n'.join([MESS_FILTERS[int(pix[w, h]) * int(filter_type) / 255]
-                               for w in range(width)])
-                    for h in range(height)])
+    pix = img.load()
+
+    img.save("./t.png")
+
+    if gray:
+        def render_pix(x, y):
+            if filter_type:
+                if reverse:
+                    return MESS_FILTERS[(255 - pix[x, y]) * filter_type // 255]
+                return MESS_FILTERS[pix[x, y] * filter_type // 255]
+            else:
+                if reverse:
+                    return MESS_FILTERS[(255 - pix[x, y]) * (len(MESS_FILTERS) - 1) // 255]
+                return MESS_FILTERS[pix[x, y] * (len(MESS_FILTERS) - 1) // 255]
+    else:
+        def render_pix(x, y):
+            print(pix[x, y])
+            return 'a'
+
+    if type(dye) is int:
+        # 特定颜色绘制
+        result = '\033[01;{}m'.format(dye) + '\n'.join([''.join([render_pix(w, h) for w in range(width)])
+                                                        for h in range(height)]) \
+               + '\033[1;m'
+    elif type(dye) is str:
+        # 随机颜色绘制
+        result = '\n'.join([''.join(["\033[{};{}m{}\033[1;m".format(random.randrange(1, 4),
+                                                                    random.randrange(30, 40),
+                                                                    render_pix(w, h))
+                                     for w in range(width)])
+                            for h in range(height)])
+
+    else:
+        # 黑白
+        result = '\n'.join([''.join([render_pix(w, h)
+                                     for w in range(width)])
+                            for h in range(height)])
+    img.close()
+    return result
 
 
-def get_gray_img(file_path, width=None, height=None):
+def get_img(file_path, gray=False):
+    """
+    获取输入图片
+    :param file_path:
+    :param gray:
+    :return:
+    """
     img = Image.open(file_path)
-    if width is not None and height is not None:
-        img = img.resize((width, height))
-    img = img.convert('L')
-    img.save(PIC_TMP)
+    if gray:
+        img = img.convert('L')
+    return img
 
 
-def get_colored_img(file_path, width, height):
-    img = Image.open(file_path)
-    if width is not None and height is not None:
-        img = img.resize((width, height))
-    img.save(PIC_TMP)
-
-
-def text_drawer(text, width, height, font_choice=0):
+def text_drawer(text, fonts=None):
     """
     将文字书写在画布上
     :param text:
-    :param width:
-    :param height:
-    :param font_choice:
+    :param fonts:
     :return:
     """
-    im = Image.new("1", (width, height), 'white')
+    im = Image.new("1", (1, 1), 'white')
     draw = ImageDraw.Draw(im)
-    size = 20
-
-    def font_location(f):
-        return path.join(FONT_DIR, f)
-
-    Max = 3
-    if 0 <= font_choice <= Max:
-        font, width, height = font[font_choice]
-    elif font_choice > Max:
-        font, width, height = font[Max]
+    if type(fonts) is int:
+        font = path.join(FONT_DIR, FONT_LIST[fonts if len(FONT_LIST) - 1 >= fonts >= 0 else 0])
+        print(font)
+    elif fonts is None:
+        font = path.join(FONT_DIR, FONT_LIST[0])
     else:
-        font, width, height = font[0]
+        font = fonts
 
-    font = font_location('shuyan.ttf')
-    font = ImageFont.truetype(font, size)
+    try:
+        font = ImageFont.truetype(font, 20)
+    except:
+        font = ImageFont.truetype(path.join(FONT_DIR, FONT_LIST[0]), 20)
+
     text_size = draw.textsize(unicode(text), font=font)
-    print(text_size, width, height)
     im = im.resize(text_size)
 
     draw = ImageDraw.Draw(im)
     draw.text((0, 0), unicode(text), font=font)
-    im.save(PIC_TMP)
-    print(PIC_TMP)
-
-
-def simple_lang(text):
-    for i in text:
-        if unichr(ord(i)) != i.decode('utf8', errors='ignore'):
-            return 'other'
-    return 'en'
-
-
-def dye_all(raw_img_string, color):
-    return '\033[01;{}m'.format(color) + raw_img_string + '\033[1;m'
-
-
-def dye_rand(raw_img_string):
-    temp = ""
-    for i in raw_img_string:
-        if i != "\n":
-            temp += "\033[{};{}m{}\033[1;m".format(randrange(1, 4), randrange(30, 40), i)
-
-    return temp
-
-
-def test():
-    # 可以看到在终端中显示出来宽度差异很大，不能直接打印在终端中
-    import random
-    for i in range(10):
-        print(''.join([random.choice(u"◾▒░▓▊") for j in range(30)]) + '|')
+    return im
 
 
 if __name__ == '__main__':
-    # text_drawer('中文好吧，，貌似是有一点点问题的样子', 200, 100)
-    test()
+    a = text_drawer('flame中文')
+    a = get_img("/Users/hellflame/Pictures/EvJIITe.jpg")
+    result = make_terminal_img(a, dye=34, filter_type=5, gray=False)
+    print(result)
+    # print(ret_type('file')(text_drawer)("中文测试", 200, 100))
+    # test()
     # get_colored_img("/Users/hellflame/Downloads/lifecycle.png", 6,6)
 
