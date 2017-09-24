@@ -12,3 +12,6 @@ bin
 var
 sdist
 develop-eggs
+
+# test picture
+*.png

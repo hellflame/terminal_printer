@@ -12,7 +12,9 @@ __url__ = 'https://github.com/hellflame/terminal_printer'
 
 FONT_LIST = ['shuyan.ttf',
              'letter.ttf',
-             'Haibaoyuanyuan.ttf']
+             'Haibaoyuanyuan.ttf',
+             'fengyun.ttf',
+             'huakangbold.otf']
 
 FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
 MESS_FILTERS = ''.join([unichr(i) for i in range(32, 256)])
@@ -44,7 +46,7 @@ def make_terminal_img(img, filter_type=None, width=None,
     :return: 图像字符
     """
     if not img:
-        return False
+        return ''
     if not keep_ratio:
         if width is None or height is None:
             img = img.resize(DEFAULT_SIZE)
@@ -71,8 +73,8 @@ def make_terminal_img(img, filter_type=None, width=None,
                 return MESS_FILTERS[pix[x, y] * filter_type // 255]
             else:
                 if reverse:
-                    return MESS_FILTERS[(255 - pix[x, y]) * (len(MESS_FILTERS) - 1) // 255]
-                return MESS_FILTERS[pix[x, y] * (len(MESS_FILTERS) - 1) // 255]
+                    return MESS_FILTERS[(255 - pix[x, y]) * 4 // 255]
+                return MESS_FILTERS[pix[x, y] * 4 // 255]
     else:
         def render_pix(x, y):
             # 如果这里也用和灰度图一样的处理方法的话，会显得很乱，终端中的颜色也难以显示出来

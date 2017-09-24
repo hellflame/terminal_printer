@@ -54,5 +54,5 @@ def font_handle(font_path, font_list, base_url):
         print("downloading", '{}/{}'.format(index + 1, len(target)), font)
         font_downloader(base_url, font, font_path)
         sys.stdout.write("\033[F")
-    print("下载完成")
+    print("下载完成" + ' ' * 20)
 
