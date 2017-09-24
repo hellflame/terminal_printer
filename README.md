@@ -18,7 +18,7 @@ $ pip install terminalprinter --user --upgrade
 $ terminalprint
 ```
 
-以上命令，将输出默认的字符图到终端
+以上命令，将输出默认的字符图到终端(命令太长？为什么不用<tab>)
 
 ![](https://static.hellflame.net/resource/de5ca9cf5320673dc43b526e3d737f05)
 
@@ -112,6 +112,13 @@ $ terminalprint -c [color]
 ```
 
 color值范围30～50，覆盖终端基本的16色
+
+也可以使用随机颜色，只要颜色值是一个非数字字符串即可
+
+```bash
+$ terminalprint -c auto
+```
+
 
 (3) 输出宽度与高度
 
