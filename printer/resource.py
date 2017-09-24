@@ -4,22 +4,12 @@ import os
 import sys
 import shutil
 from os.path import exists, join
-if sys.version[0] == '2':
+if sys.version_info.major == 2:
     from urllib2 import urlopen
     reload(sys)
     sys.setdefaultencoding("utf8")
 else:
     from urllib.request import urlopen
-
-
-def missing_font(font_path, font_list):
-    """
-    查找缺失字体
-    :param font_path:
-    :param font_list:
-    :return:
-    """
-    return [f for f in font_list if not exists(join(font_path, f))]
 
 
 def font_downloader(base_url, font_name, font_path):
@@ -37,17 +27,17 @@ def font_downloader(base_url, font_name, font_path):
 
 def font_handle(font_path, font_list, base_url):
     """
-    字体下载管理，如果没有缺失字体依然执行，将重新下载所有字体
+    字体下载管理，如果没有缺失字体依然执行，将提示重新下载所有字体
     :param font_path:
     :param font_list:
     :param base_url:
     :return:
     """
-    target = missing_font(font_path, font_list)
+    target = [f for f in font_list if not exists(join(font_path, f))]
     if not target:
         # 如果字体完整依然执行初始化，则提示删除原有字体目录
         prompt = "当前字体数据完整，是否继续初始化? y/n "
-        if sys.version[0] == 2:
+        if sys.version_info.major == 2:
             if not raw_input(prompt).lower().startswith('y'):
                 return False
         else:
@@ -64,5 +54,5 @@ def font_handle(font_path, font_list, base_url):
         print("downloading", '{}/{}'.format(index + 1, len(target)), font)
         font_downloader(base_url, font, font_path)
         sys.stdout.write("\033[F")
-    print()
+    print("下载完成")
 

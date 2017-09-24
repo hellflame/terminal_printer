@@ -75,7 +75,7 @@ def make_terminal_img(img, filter_type=None, width=None,
                 return MESS_FILTERS[pix[x, y] * (len(MESS_FILTERS) - 1) // 255]
     else:
         def render_pix(x, y):
-            # 如果这里也用随机填充的话，会显得很乱
+            # 如果这里也用和灰度图一样的处理方法的话，会显得很乱，终端中的颜色也难以显示出来
             return '\033[0;38;2;%s;%s;%sm' % pix[x, y] + MESS_FILTERS[filter_type]
 
     if type(dye) is int:
