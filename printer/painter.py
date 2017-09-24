@@ -7,7 +7,7 @@ import random
 
 __all__ = ['Printer']
 __author__ = 'hellflame'
-__version__ = '1.3.1'
+__version__ = '1.3.2'
 __url__ = 'https://github.com/hellflame/terminal_printer'
 
 FONT_LIST = ['shuyan.ttf',
@@ -46,6 +46,7 @@ def make_terminal_img(img, filter_type=None, width=None,
     :return: 图像字符
     """
     if not img:
+        # 如果文字画布生成失败，img为空
         return ''
     if not keep_ratio:
         if width is None or height is None:
@@ -86,9 +87,8 @@ def make_terminal_img(img, filter_type=None, width=None,
                                                         for h in range(height)])
     elif type(dye) is str:
         # 随机颜色绘制
-        result = '\n'.join([''.join(["\033[{};{}m{}".format(random.randrange(1, 4),
-                                                                    random.randrange(30, 40),
-                                                                    render_pix(w, h))
+        result = '\n'.join([''.join(["\033[01;{}m{}".format(random.randrange(30, 40),
+                                                            render_pix(w, h))
                                      for w in range(width)])
                             for h in range(height)])
 
@@ -98,15 +98,15 @@ def make_terminal_img(img, filter_type=None, width=None,
                                      for w in range(width)])
                             for h in range(height)])
     img.close()
-    return result + '\033[m'
+    return result + '\033[00m'
 
 
 def get_img(file_path, gray=False):
     """
     获取输入图片
-    :param file_path:
-    :param gray:
-    :return:
+    :param file_path: 图片文件位置
+    :param gray: 是否转换为灰度图
+    :return: img
     """
     try:
         img = Image.open(file_path)
@@ -120,16 +120,16 @@ def get_img(file_path, gray=False):
 
 def text_drawer(text, fonts=None):
     """
-    将文字书写在画布上
-    :param text:
-    :param fonts:
-    :return:
+    将文字书写在白色画布上
+    :param text: 要书写的文字
+    :param fonts: 字体选择，索引或路径
+    :return: img
     """
-    im = Image.new("1", (1, 1), 'white')
+    im = Image.new("1", (1, 1), 'white')  # 初始画布大小没有关系
     draw = ImageDraw.Draw(im)
     if type(fonts) is int:
         font = path.join(FONT_DIR, FONT_LIST[fonts if len(FONT_LIST) - 1 >= fonts >= 0 else 0])
-        print(font)
+        # print(font)
     elif fonts is None:
         font = path.join(FONT_DIR, FONT_LIST[0])
     else:
@@ -142,7 +142,7 @@ def text_drawer(text, fonts=None):
         if path.exists(target):
             font = ImageFont.truetype(target, 20)
         else:
-            print("需要先初始化字体")
+            print("字体缺失，请初始化字体!")
             return None
 
     text_size = draw.textsize(unicode(text), font=font)
@@ -151,14 +151,4 @@ def text_drawer(text, fonts=None):
     draw = ImageDraw.Draw(im)
     draw.text((0, 0), unicode(text), font=font)
     return im
-
-
-if __name__ == '__main__':
-    a = text_drawer('flame中文')
-    a = get_img("/Users/hellflame/Pictures/EvJIITe.jpg")
-    result = make_terminal_img(a, dye=34, filter_type=73, gray=False)
-    print(result)
-    # print(ret_type('file')(text_drawer)("中文测试", 200, 100))
-    # test()
-    # get_colored_img("/Users/hellflame/Downloads/lifecycle.png", 6,6)
 
