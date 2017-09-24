@@ -2,6 +2,8 @@
 
 输出字符图片到终端
 
+(看惯了Retina，可能也想看看高清的马赛克)
+
 ### 安装
 
 ```bash
@@ -31,9 +33,9 @@ $ terminalprint -h
 得到类似输出:
 
 ```bash
-usage: run.py [-h] [-i] [-t TEXT] [-l l] [-g] [-kr] [-c i] [-f i]
-              [--width WIDTH] [--height HEIGHT] [-F path] [-r] [-v]
-              [picture]
+usage: terminalprint [-h] [-i] [-t TEXT] [-c i] [-f i] [--width WIDTH]
+                     [--height HEIGHT] [-g] [-kr] [-F path] [-r] [-v]
+                     [picture]
 
 Terminal Printer
 
@@ -44,12 +46,12 @@ optional arguments:
   -h, --help            show this help message and exit
   -i, --init            初始化程序，下载字体
   -t TEXT, --text TEXT  设置将要处理的文本内容，默认为 HellFlame
-  -g, --gray            图像转换为灰度图(若指定图)
-  -kr, --keep-ratio     保持图片比例
   -c i, --color i       设置颜色
   -f i, --filter i      设置打印填充方式
   --width WIDTH         设置输出宽度，需要与高度一起设置
   --height HEIGHT       设置输出高度，需要与宽度一起设置
+  -g, --gray            图像转换为灰度图(若指定图)
+  -kr, --keep-ratio     保持图片比例
   -F path, --font path  设置书写字体
   -r, --reverse         反色(对彩色输出无效)
   -v, --version         输出版本信息
@@ -98,10 +100,10 @@ $ terminalprint -t '文字'
 (1) 填充字符
 
 ```bash
-$ terminalprint -f [filt char]
+$ terminalprint -f [filt_char]
 ```
 
-可以设置的值范围1～223，覆盖ANSI可打印字符
+可以设置的值范围1～223，代表ANSI可打印字符索引
 
 (2) 渲染颜色
 
@@ -119,7 +121,6 @@ color值范围30～50，覆盖终端基本的16色
 $ terminalprint -c auto
 ```
 
-
 (3) 输出宽度与高度
 
 > 高度与宽度需要同时指定，否则尝试使用终端显示区域大小，若获取失败，则使用默认值
@@ -128,7 +129,7 @@ $ terminalprint -c auto
 $ terminalprint --width 100 --height 20
 ```
 
-当然，高宽过小，会导致输出的内容难以辨识出原来的样子，高宽过大，会导致终端中的换行出现，更难辨认
+当然，高宽过小，会导致输出的内容难以辨识出原来的样子，高宽过大，会导致终端中的换行出现，更难辨认。不过，可以将输出内容重定向到其他文本中，这样其他适合的屏幕就可以重现这一刻的样子了。
 
 (4) 字体选择
 
@@ -176,6 +177,22 @@ $ terminalprint [pic path]
 
 只有把终端字体设置的很小，才有可能看到很多细节，但是此时终端的背景色(黑色)也会更加影响视觉效果，在这里显得更暗了。
 
+(1) 转换为灰度图
+
+> 一般这种情况下需要把填充字符索引降低一些，使用 `-f 4` 看上去会好一些 
+
+```bash
+$ terminalprint -g [pic]
+```
+
+(2) 保持原图比例
+
+> 虽然说是保持原图比例，但是由于终端中行距和字间距不同，可能看上去比例反而不合适
+
+```bash
+$ ternimalprint -kr [pic]
+```
+
 设置文字格式中的大部分命令可用，比如强制图片使用灰度图，并且控制填充字符索引不要太高，可能得到以下结果
 
 ```bash
@@ -187,4 +204,3 @@ $ terminalprint [pic path]
 这里的填充字符索引会多义为使用不超过ANSI中可打印字符码值不超过4的字符来表示不同的灰度级别，索引值越大，灰度的符号越多，看上去也会更杂乱。实际上，如果将索引调到最大的话，还是依稀可以看到原图的影子的，不过实际效果嘛，，，灰阶较少的图片也没有问题。
 
 嗯，以上，Just For Fun!
-
