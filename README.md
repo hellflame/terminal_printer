@@ -18,7 +18,7 @@ $ pip install terminalprinter --user --upgrade
 $ terminalprint
 ```
 
-以上命令，将输出默认的字符图到终端(命令太长？为什么不用__tab__)
+以上命令，将输出默认的字符图到终端(命令太长？为什么不用*tab*)
 
 ![](https://static.hellflame.net/resource/de5ca9cf5320673dc43b526e3d737f05)
 
