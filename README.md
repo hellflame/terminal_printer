@@ -159,7 +159,7 @@ $ terminalprint -r
 $ terminalprint [pic path]
 ```
 
-正常的话，可能得到类似下面的输出:
+理想的话，可能得到类似下面的输出:
 
 ![](https://static.hellflame.net/resource/691d8fddc0dbd019da384b5a2d65bfa2)
 
