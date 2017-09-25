@@ -11,7 +11,6 @@ __all__ = ['SockFeed', 'HTTPCons', 'unit_change']
 
 
 if sys.version_info.major == 2:
-    from cStringIO import StringIO
 
     def s2b(s):
         return s
@@ -19,17 +18,12 @@ if sys.version_info.major == 2:
     def b2s(s):
         return s
 else:
-    from io import StringIO
 
     def s2b(s):
-        if isinstance(s, bytes):
-            return s
         return bytes(s.encode())
 
     def b2s(s):
-        if isinstance(s, str):
-            return s
-        return s.decode(errors='ignore')
+        return s.decode()
 
 
 def bar(width=0, fill='#'):
@@ -86,21 +80,22 @@ class SockFeed(object):
     """
     连接响应
     """
-    def __init__(self, httpConnection, chuck=1024):
-        self.socket = httpConnection.connect
+    def __init__(self, connection, chuck=1024):
+        self.socket = connection.connect
         self.buffer = None
         self.chuck_size = chuck
-        self.head = None
-        self.header = {}
-        self.http_code = 0
-        self.data = ''
+        self.status = None
+        self.raw_head = b''
+        self.tail = b''
+        self.headers = {}
+        self.data = b''
         self.progressed = 0
         self.total = 0
         self.disable_progress = False
         self.last_stamp = time.time()
         self.top_speed = 0
         self.chucked = False
-        self.title = ''
+        self.title = b''
 
         self.file_handle = None
 
@@ -110,10 +105,9 @@ class SockFeed(object):
 
     @bar()
     def http_response(self, file_path='', skip_body=False):
-        # TODO:: 手动处理http中的\r\n
         """
         通过进度条控制获取响应结果
-        :param file_path: str => 下载文件位置，若文件已存在，则在后面用数字区分版本
+        :param file_path: str => 下载文件位置，若文件已存在，则在前面用数字区分版本
         :param skip_body: bool => 是否跳过http实体
         :return:
         """
@@ -121,63 +115,69 @@ class SockFeed(object):
             file_index = 1
             path_choice = file_path
             while os.path.exists(path_choice):
-                path_choice = '{}.{}'.format(file_path, file_index)
+                path_choice = b'{}_{}'.format(file_index, file_path)
                 file_index += 1
 
             self.file_handle = open(path_choice, 'wb')
             self.title = path_choice
-        if self.head and self.progressed == self.total:
+
+        if self.status and self.progressed == self.total:
             self.total = self.progressed = 100
             return self.data
+
         data = self.socket.recv(self.chuck_size)
-        temp = StringIO(b2s(data))
+
         if not data:
             self.progressed = self.total = 100
             return self.data
 
-        if not self.head or not self.header:
-            self.head = temp.readline().strip()
-            self.http_code = int(self.head.split(" ")[1])
-            if not self.http_code == 200:
-                self.total = self.progressed = 1
-                if self.file_handle:
-                    current_file_name = self.file_handle.name
+        if not self.status or not self.headers:
+            if b'\r\n\r\n' not in self.raw_head:
+                self.raw_head += data
+            else:
+                seps = self.raw_head[0: self.raw_head.index(b'\r\n\r\n')].split(b'\r\n')
+                status = seps[0].split(b' ')
+                self.status = {
+                    'status': status,
+                    'code': status[1],
+                    'version': status[0]
+                }
+                if self.file_handle and not self.status['code'] == '200':
                     self.file_handle.close()
-                    os.remove(current_file_name)
-                return False
-            while True:
-                partial = temp.readline()
-                if not partial or partial == '\r\n':
-                    if self.header.get("Content-Length"):
-                        self.total = int(self.header.get("Content-Length"))
-                    elif self.header.get("Transfer-Encoding") == 'chunked':
-                        self.chucked = True
-                        self.progressed = self.total = 1
-                        raise Exception("chucked encoding not supported!")
-                    break
-                index = partial.index(":")
-                key = partial[0: index].strip()
-                val = partial[index + 1:].strip()
-                self.header[key] = val
-            if skip_body:
-                self.total = self.progressed = 100
-                return self.header
-            left = temp.read()
+                    os.remove(file_path)
+                    self.total = self.progressed = 1
+                    return False
+                self.headers = {
+                    i.split(b":")[0]: i.split(b":")[1] for i in seps
+                }
 
-            if left:
-                if self.file_handle:
-                    self.file_handle.write(s2b(left))
+                if skip_body:
+                    self.total = self.progressed = 100
+                    return True
+
+                if 'Content-Length' in self.headers:
+                    self.total = int(self.headers['Content-Length'])
                 else:
-                    self.data += b2s(left)
+                    self.total = self.progressed = 1
+                    print("Content-Length not Found!")
+                    return False
 
-                self.progressed += len(s2b(left))
+                left = self.raw_head[self.raw_head.index(b"\r\n\r\n") + 4:]
+
+                if left:
+                    if self.file_handle:
+                        self.file_handle.write(left)
+                    else:
+                        self.data += left
+
+                    self.progressed += len(left)
 
         else:
             if self.file_handle:
-                self.file_handle.write(s2b(data))
+                self.file_handle.write(data)
             else:
-                self.data += b2s(data)
-            self.progressed += len(s2b(data))
+                self.data += data
+            self.progressed += len(data)
 
 
 class HTTPCons(object):
@@ -325,3 +325,12 @@ class URLNotComplete(Exception):
 
     def __str__(self):
         return "URL: {} missing {}".format(self.url, self.lack)
+
+
+if __name__ == '__main__':
+    req = HTTPCons()
+    req.request("https://static.hellflame.net/resource/1d64e5e31f7edfabbf5e049c2e3c386d")
+    feed = SockFeed(req, chuck=4096)
+    feed.http_response("test.jpg")
+    print(feed.status, feed.headers)
+
