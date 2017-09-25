@@ -9,14 +9,6 @@ if sys.version_info.major == 2:
     reload(sys)
     sys.setdefaultencoding("utf8")
 
-    def b2s(s):
-        return s
-else:
-    def b2s(s):
-        if isinstance(s, str):
-            return s
-        return s.decode(errors='ignore')
-
 
 def font_downloader(base_url, font_name, font_path):
     """
@@ -28,18 +20,18 @@ def font_downloader(base_url, font_name, font_path):
     """
     downloader = http.HTTPCons()
     downloader.request(base_url + font_name)
-    feed = http.SockFeed(downloader, 4096)
+    feed = http.SockFeed(downloader)
     start = time.time()
-    feed.http_response(os.path.join(font_path, font_name))
+    feed.http_response(os.path.join(font_path, font_name), chunk=4096)
 
-    if not feed.http_code == 200:
+    if not int(feed.status['code']) == 200:
         print("\033[01;31m{}\033[00m not exist !".format(font_name))
         if feed.file_handle and os.path.isfile(feed.file_handle.name):
             os.unlink(feed.file_handle.name)
         return False
 
     end = time.time()
-    size = int(feed.header.get('Content-Length', 1))
+    size = int(feed.headers.get('Content-Length', 1))
     print("\033[01;31m{}\033[00m downloaded @speed \033[01;32m{}/s\033[00m"
           .format(font_name,
                   http.unit_change(size / (end - start))))
@@ -75,5 +67,5 @@ def font_handle(font_path, font_list, base_url):
     for font in target:
         font_downloader(base_url, font, font_path)
 
-    print("下载完成" + ' ' * 20)
+    print("下载完成")
 

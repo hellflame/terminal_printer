@@ -88,7 +88,7 @@ class SockFeed(object):
         self.disable_progress = False
         self.chunked = False
         self.current_chunk = None
-        self.title = b''
+        self.title = ''
 
         self.file_handle = None
 
@@ -121,7 +121,7 @@ class SockFeed(object):
             file_index = 1
             path_choice = file_path
             while os.path.exists(path_choice):
-                path_choice = b'{}_{}'.format(file_index, file_path)
+                path_choice = '{}_{}'.format(file_index, file_path)
                 file_index += 1
 
             self.file_handle = open(path_choice, 'wb')
@@ -146,19 +146,20 @@ class SockFeed(object):
                     'code': status[1],
                     'version': status[0]
                 }
-                if self.file_handle and not self.status['code'] == '200':
+                if self.file_handle and not self.status['code'] == b'200':
                     self.clean_failed_file()
                     self.total = self.progressed = 1
                     return False
                 self.headers = {
                     i.split(b":")[0]: i.split(b":")[1].strip() for i in seps[1:]
                 }
+                # print("\n".join(["{} => {}".format(str(k), str(self.headers[k])) for k in self.headers]))
                 if skip_body:
                     self.total = self.progressed = 100
                     return True
 
-                if 'Content-Length' in self.headers:
-                    self.total = int(self.headers['Content-Length'])
+                if b'Content-Length' in self.headers:
+                    self.total = int(self.headers[b'Content-Length'])
                 else:
                     self.total = 100
                     self.chunked = True
@@ -172,7 +173,7 @@ class SockFeed(object):
                     else:
 
                         self.current_chunk = {
-                            'size': int(left[0: left.index(b'\r\n')], 16),
+                            'size': int(left[: left.index(b'\r\n')], 16),
                             'content': left[left.index(b'\r\n') + 2:]
                         }
 
@@ -184,7 +185,6 @@ class SockFeed(object):
                 self.progressed += len(data)
             else:
                 if self.current_chunk:
-                    print(self.current_chunk)
                     diff = self.current_chunk['size'] - len(self.current_chunk['content'])
                     if diff > 0:
                         if len(data) > diff:
@@ -200,13 +200,15 @@ class SockFeed(object):
                         else:
                             self.current_chunk['content'] += data
                     else:
-                        print(self.current_chunk['content'], diff)
                         self.save_data(self.current_chunk['content'][: self.current_chunk['size']])
-                        left = self.current_chunk['content'][self.current_chunk['size']:]
-                        self.current_chunk = {
-                            'size': int(left[: left.index(b'\r\n')], 16),
-                            'content': left[left.index(b'\r\n') + 2:] + data
-                        }
+                        left = self.current_chunk['content'][self.current_chunk['size'] + 2:] + data
+                        if left:
+                            self.current_chunk = {
+                                'size': int(left[: left.index(b'\r\n')], 16),
+                                'content': left[left.index(b'\r\n') + 2:]
+                            }
+                        else:
+                            self.current_chunk = None
                 else:
                     self.current_chunk = {
                         'size': int(data[: data.index(b'\r\n')], 16),
@@ -300,7 +302,7 @@ class HTTPCons(object):
     def __send(self, href, method='GET', headers=None, post_data=None):
         data = """{method} {href} HTTP/1.1\r\n{headers}\r\n\r\n"""
         # UA = "{user}_on_{platform}_HELLFLAME"  # 出于隐私考虑，暂时还是不用这样的UA了
-        UA = "Secret"
+        UA = "terminal printer user"
         if not headers:
             head = """Host: {}\r\n""".format(self.host)
             head += "User-Agent: " + UA
@@ -365,11 +367,4 @@ class URLNotComplete(Exception):
     def __str__(self):
         return "URL: {} missing {}".format(self.url, self.lack)
 
-
-if __name__ == '__main__':
-    req = HTTPCons()
-    req.request("https://static.hellflame.net/resource/d3851aa8133e6f50e50b3c0bc08db72d")
-    feed = SockFeed(req)
-    feed.http_response(chunk=1024)
-    print(feed.status, feed.headers)
 
