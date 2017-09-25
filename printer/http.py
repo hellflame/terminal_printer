@@ -1,8 +1,8 @@
 # coding=utf8
 from __future__ import print_function
+import random
 import socket
 import math
-import time
 import sys
 import ssl
 import os
@@ -55,10 +55,7 @@ def bar(width=0, fill='#'):
                     # marks count
                     percent_show = "{}%".format(int(percent * 100))
                     # marks width
-                    if hasattr(self, 'title'):
-                        title = os.path.basename(self.title)
-                    else:
-                        title = ''
+                    title = getattr(self, 'title', '')
                     mark_width = w - len(percent_show) - 5 - len(title) - 2
                     mark_count = int(math.floor(mark_width * percent))
                     sys.stdout.write(
@@ -80,21 +77,17 @@ class SockFeed(object):
     """
     连接响应
     """
-    def __init__(self, connection, chuck=1024):
+    def __init__(self, connection):
         self.socket = connection.connect
-        self.buffer = None
-        self.chuck_size = chuck
         self.status = None
         self.raw_head = b''
-        self.tail = b''
         self.headers = {}
         self.data = b''
         self.progressed = 0
         self.total = 0
         self.disable_progress = False
-        self.last_stamp = time.time()
-        self.top_speed = 0
-        self.chucked = False
+        self.chunked = False
+        self.current_chunk = None
         self.title = b''
 
         self.file_handle = None
@@ -103,12 +96,25 @@ class SockFeed(object):
         if self.file_handle:
             self.file_handle.close()
 
+    def clean_failed_file(self):
+        if self.file_handle:
+            name = self.file_handle.name
+            self.file_handle.close()
+            os.unlink(name)
+
+    def save_data(self, data):
+        if self.file_handle:
+            self.file_handle.write(data)
+        else:
+            self.data += data
+
     @bar()
-    def http_response(self, file_path='', skip_body=False):
+    def http_response(self, file_path='', skip_body=False, chunk=4094):
         """
         通过进度条控制获取响应结果
         :param file_path: str => 下载文件位置，若文件已存在，则在前面用数字区分版本
         :param skip_body: bool => 是否跳过http实体
+        :param chunk: int => 缓存块大小
         :return:
         """
         if file_path and not self.file_handle:
@@ -119,22 +125,20 @@ class SockFeed(object):
                 file_index += 1
 
             self.file_handle = open(path_choice, 'wb')
-            self.title = path_choice
+            self.title = os.path.basename(path_choice)
 
         if self.status and self.progressed == self.total:
             self.total = self.progressed = 100
             return self.data
 
-        data = self.socket.recv(self.chuck_size)
+        data = self.socket.recv(chunk)
 
         if not data:
             self.progressed = self.total = 100
-            return self.data
-
-        if not self.status or not self.headers:
-            if b'\r\n\r\n' not in self.raw_head:
-                self.raw_head += data
-            else:
+            return True
+        if not self.status:
+            self.raw_head += data
+            if b'\r\n\r\n' in self.raw_head:  # 接收数据直到 `\r\n\r\n` 为止
                 seps = self.raw_head[0: self.raw_head.index(b'\r\n\r\n')].split(b'\r\n')
                 status = seps[0].split(b' ')
                 self.status = {
@@ -143,14 +147,12 @@ class SockFeed(object):
                     'version': status[0]
                 }
                 if self.file_handle and not self.status['code'] == '200':
-                    self.file_handle.close()
-                    os.remove(file_path)
+                    self.clean_failed_file()
                     self.total = self.progressed = 1
                     return False
                 self.headers = {
-                    i.split(b":")[0]: i.split(b":")[1] for i in seps
+                    i.split(b":")[0]: i.split(b":")[1].strip() for i in seps[1:]
                 }
-
                 if skip_body:
                     self.total = self.progressed = 100
                     return True
@@ -158,26 +160,63 @@ class SockFeed(object):
                 if 'Content-Length' in self.headers:
                     self.total = int(self.headers['Content-Length'])
                 else:
-                    self.total = self.progressed = 1
-                    print("Content-Length not Found!")
-                    return False
+                    self.total = 100
+                    self.chunked = True
 
                 left = self.raw_head[self.raw_head.index(b"\r\n\r\n") + 4:]
 
                 if left:
-                    if self.file_handle:
-                        self.file_handle.write(left)
+                    if not self.chunked:
+                        self.save_data(left)
+                        self.progressed += len(left)
                     else:
-                        self.data += left
 
-                    self.progressed += len(left)
+                        self.current_chunk = {
+                            'size': int(left[0: left.index(b'\r\n')], 16),
+                            'content': left[left.index(b'\r\n') + 2:]
+                        }
+
+                        self.progressed = random.randrange(1, 10)
 
         else:
-            if self.file_handle:
-                self.file_handle.write(data)
+            if not self.chunked:
+                self.save_data(data)
+                self.progressed += len(data)
             else:
-                self.data += data
-            self.progressed += len(data)
+                if self.current_chunk:
+                    print(self.current_chunk)
+                    diff = self.current_chunk['size'] - len(self.current_chunk['content'])
+                    if diff > 0:
+                        if len(data) > diff:
+                            self.current_chunk['content'] += data[0: diff]
+                            self.save_data(self.current_chunk['content'])
+                            if data[diff: data.index(b'\r\n')]:
+                                self.current_chunk = {
+                                    'size': int(data[diff: data.index(b'\r\n')], 16),
+                                    'content': data[data.index(b'\r\n') + 2:]
+                                }
+                            else:
+                                self.current_chunk = None
+                        else:
+                            self.current_chunk['content'] += data
+                    else:
+                        print(self.current_chunk['content'], diff)
+                        self.save_data(self.current_chunk['content'][: self.current_chunk['size']])
+                        left = self.current_chunk['content'][self.current_chunk['size']:]
+                        self.current_chunk = {
+                            'size': int(left[: left.index(b'\r\n')], 16),
+                            'content': left[left.index(b'\r\n') + 2:] + data
+                        }
+                else:
+                    self.current_chunk = {
+                        'size': int(data[: data.index(b'\r\n')], 16),
+                        'content': data[data.index(b'\r\n') + 2:]
+                    }
+
+                if self.current_chunk and self.current_chunk['size'] == 0:
+                    self.progressed = 100
+                else:
+                    self.progressed = random.randrange(20, 80)
 
 
 class HTTPCons(object):
@@ -329,8 +368,8 @@ class URLNotComplete(Exception):
 
 if __name__ == '__main__':
     req = HTTPCons()
-    req.request("https://static.hellflame.net/resource/1d64e5e31f7edfabbf5e049c2e3c386d")
-    feed = SockFeed(req, chuck=4096)
-    feed.http_response("test.jpg")
+    req.request("https://static.hellflame.net/resource/d3851aa8133e6f50e50b3c0bc08db72d")
+    feed = SockFeed(req)
+    feed.http_response(chunk=1024)
     print(feed.status, feed.headers)
 
