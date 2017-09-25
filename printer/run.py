@@ -1,12 +1,12 @@
 # coding=utf8
 from __future__ import print_function
 import os
-import painter
-import resource
+import argparse
+from . import painter
+from . import resource
 
 
 def parser():
-    import argparse
     parse = argparse.ArgumentParser(description="Terminal Printer",
                                     formatter_class=argparse.RawTextHelpFormatter,
                                     epilog="初次使用，需要初始化字体下载"
@@ -58,7 +58,7 @@ def command(args, parse):
     if args.init:
         resource.font_handle(painter.FONT_DIR, painter.FONT_LIST, 'http://7xqh1q.dl1.z0.glb.clouddn.com/')
     elif args.version:
-        print("TerminalPrinter v." + painter.__version__)
+        print("TerminalPrinter v" + painter.__version__)
     elif args.picture:
         if os.path.exists(args.picture):
             print(painter.make_terminal_img(painter.get_img(args.picture, gray=args.gray),

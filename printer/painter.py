@@ -17,12 +17,15 @@ FONT_LIST = ['shuyan.ttf',
              'huakangbold.otf']
 
 FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
-MESS_FILTERS = ''.join([unichr(i) for i in range(32, 256)])
 
 
 if sys.version_info.major == 2:
     reload(sys)
     sys.setdefaultencoding('utf8')
+    MESS_FILTERS = ''.join([unichr(i) for i in range(32, 256)])
+else:
+    MESS_FILTERS = ''.join([chr(i) for i in range(32, 256)])
+    unicode = lambda s: s
 
 try:
     DEFAULT_SIZE = tuple(reversed([int(s) for s in popen("stty size").read().split()]))
@@ -137,6 +140,8 @@ def text_drawer(text, fonts=None):
 
     try:
         font = ImageFont.truetype(font, 20)
+    except OSError:
+        print("字体文件损坏，请使用其他字体或重新初始化")
     except:
         target = path.join(FONT_DIR, FONT_LIST[0])
         if path.exists(target):
