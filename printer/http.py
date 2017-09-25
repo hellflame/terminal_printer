@@ -110,6 +110,7 @@ class SockFeed(object):
 
     @bar()
     def http_response(self, file_path='', skip_body=False):
+        # TODO:: 手动处理http中的\r\n
         """
         通过进度条控制获取响应结果
         :param file_path: str => 下载文件位置，若文件已存在，则在后面用数字区分版本
