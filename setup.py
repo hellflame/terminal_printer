@@ -18,6 +18,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
         'Environment :: Console',
         'License :: OSI Approved :: MIT License',
         "Operating System :: MacOS",
