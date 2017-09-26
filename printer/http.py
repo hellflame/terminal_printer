@@ -10,22 +10,6 @@ import os
 __all__ = ['SockFeed', 'HTTPCons', 'unit_change']
 
 
-if sys.version_info.major == 2:
-
-    def s2b(s):
-        return s
-
-    def b2s(s):
-        return s
-else:
-
-    def s2b(s):
-        return bytes(s.encode())
-
-    def b2s(s):
-        return s.decode()
-
-
 def bar(width=0, fill='#'):
     """
     进度条处理
@@ -142,7 +126,7 @@ class SockFeed(object):
                 seps = self.raw_head[0: self.raw_head.index(b'\r\n\r\n')].split(b'\r\n')
                 status = seps[0].split(b' ')
                 self.status = {
-                    'status': status,
+                    'status': seps[0],
                     'code': status[1],
                     'version': status[0]
                 }
@@ -332,7 +316,7 @@ class HTTPCons(object):
         if self.is_debug:
             print("\033[01;33mRequest:\033[00m\033[01;31m(DANGER)\033[00m")
             print(data.__repr__().strip("'"))
-        self.connect.sendall(s2b(data))
+        self.connect.sendall(data.encode())
 
     def __del__(self):
         if self.connect is self.s:
@@ -367,4 +351,10 @@ class URLNotComplete(Exception):
     def __str__(self):
         return "URL: {} missing {}".format(self.url, self.lack)
 
+if __name__ == '__main__':
+    req = HTTPCons()
+    req.request('https://static.hellflame.net/resource/de5ca9cf5320673dc43b526e3d737f05')
+    resp = SockFeed(req)
+    resp.http_response()
+    print(resp.status, resp.headers)
 
