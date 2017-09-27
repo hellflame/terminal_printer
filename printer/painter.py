@@ -5,7 +5,7 @@ from os import popen, path
 import sys
 import random
 
-__all__ = ['Printer']
+__all__ = ['make_terminal_img', 'get_img', 'text_drawer']
 __author__ = 'hellflame'
 __version__ = '1.3.3'
 __url__ = 'https://github.com/hellflame/terminal_printer'

@@ -7,6 +7,8 @@ import sys
 import ssl
 import os
 
+from subprocess import check_output
+
 __all__ = ['SockFeed', 'HTTPCons', 'unit_change']
 
 
@@ -30,7 +32,7 @@ def bar(width=0, fill='#'):
                         break
                     if not width:
                         try:
-                            w = int(os.popen("stty size 2>/dev/null").read().split(" ")[1])
+                            w = int(check_output("stty size", stderr=None, shell=True).split(b" ")[1])
                         except:
                             w = 50
                     else:

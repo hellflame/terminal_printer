@@ -9,6 +9,8 @@ if sys.version_info.major == 2:
     reload(sys)
     sys.setdefaultencoding("utf8")
 
+__all__ = ['font_downloader', 'font_handle']
+
 
 def font_downloader(base_url, font_name, font_path):
     """
