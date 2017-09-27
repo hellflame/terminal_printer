@@ -359,7 +359,10 @@ class HTTPCons(object):
         if self.is_debug:
             print("\033[01;33mRequest:\033[00m\033[01;31m(DANGER)\033[00m")
             print(data.__repr__().strip("'"))
-        self.connect.sendall(data.encode())
+        if sys.version_info.major == 3:
+            self.connect.sendall(data.encode())
+        else:
+            self.connect.sendall(data)
 
 
 class URLNotComplete(Exception):
@@ -378,8 +381,8 @@ if __name__ == '__main__':
 
     class HTTPTest(unittest.TestCase):
         """
-        static.hellflame.net域名下的文件大多数情况下都是chunked编码
-
+        static.hellflame.net 域名下的文件大多数情况下都是chunked编码
+        raw.githubusercontent.com 域名下文件未分块
         """
         def test_https_request(self):
             req = HTTPCons()
@@ -438,5 +441,14 @@ if __name__ == '__main__':
                 content = handle.read()
             os.remove(resp.file_handle.name)
             self.assertEqual(hashlib.md5(content).hexdigest(), '8688229badcaa3cb2730dab99a618be6')
+
+        def test_non_chunked_in_memory(self):
+            req = HTTPCons()
+            req.request("https://raw.githubusercontent.com/hellflame/qiniu_manager/v1.4.6/qiniuManager/manager.py")
+            resp = SockFeed(req)
+            resp.disable_progress = True
+            resp.http_response()
+            self.assertEqual(hashlib.md5(resp.data).hexdigest(), '276efce035d49f7f3ea168b720075523')
+
 
     unittest.main()
