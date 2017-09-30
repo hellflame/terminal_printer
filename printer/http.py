@@ -113,6 +113,56 @@ class SockFeed(object):
         else:
             self.data += data
 
+    def flush_chunk(self, data=None):
+        if data:
+            if self.current_chunk:
+                self.current_chunk['content'] += data
+            else:
+                size_chunk = data[: data.index(b'\r\n')]
+                if size_chunk:
+                    size = int(size_chunk, 16)
+                    if not size:
+                        return self.finish_loop()
+                    self.current_chunk = {
+                        'size': size,
+                        'content': data[data.index(b'\r\n') + 2:]
+                    }
+                else:
+                    return
+
+        while True:
+            if not self.current_chunk:
+                break
+            oversize = len(self.current_chunk['content']) - self.current_chunk['size']
+            if oversize < 0:
+                break
+            self.save_data(self.current_chunk['content'][: self.current_chunk['size']])
+            left = self.current_chunk['content'][self.current_chunk['size']:]
+            if left:
+                if left.startswith(b'\r\n'):  # 上一个分组不包含结尾 \r\n
+                    real_left = left[2:]
+                    if real_left:
+                        size = int(real_left[: real_left.index(b'\r\n')], 16)
+                        if not size:
+                            return self.finish_loop()
+                        self.current_chunk = {
+                            'size': size,
+                            'content': real_left[real_left.index(b'\r\n') + 2:]
+                        }
+                    else:
+                        self.current_chunk = None
+                else:  # 上一个分组把 \r\n 作为自己的实体
+                    size = int(left[: left.index(b'\r\n')], 16)
+                    if not size:
+                        return self.finish_loop()
+                    self.current_chunk = {
+                        'size': size,
+                        'content': left[left.index(b'\r\n') + 2:]
+                    }
+            else:
+                self.current_chunk = None
+        self.progressed = random.randrange(20, 80)
+
     @bar()
     def http_response(self, file_path='', skip_body=False, chunk=4094, overwrite=False):
         """
@@ -189,7 +239,7 @@ class SockFeed(object):
                             'content': left[left.index(b'\r\n') + 2:]
                         }
 
-                        self.progressed = random.randrange(1, 10)
+                        self.flush_chunk()
 
         else:
             if not self.chunked:
@@ -198,45 +248,7 @@ class SockFeed(object):
                 if self.progressed == self.total:
                     self.finish_loop()
             else:
-                if self.current_chunk:
-                    diff = self.current_chunk['size'] - len(self.current_chunk['content'])
-                    if diff > 0:
-                        # 数据未装满一个chuck
-                        if len(data) > diff:
-                            self.current_chunk['content'] += data[0: diff]
-                            self.save_data(self.current_chunk['content'])
-                            if data[diff: data.index(b'\r\n')]:
-                                self.current_chunk = {
-                                    'size': int(data[diff: data.index(b'\r\n')], 16),
-                                    'content': data[data.index(b'\r\n') + 2:]
-                                }
-                            else:
-                                self.current_chunk = None
-                        else:
-                            self.current_chunk['content'] += data
-                    else:
-                        self.save_data(self.current_chunk['content'][: self.current_chunk['size']])
-                        left = self.current_chunk['content'][self.current_chunk['size'] + 2:] + data
-                        if left:
-                            if left[: left.index(b'\r\n')]:
-                                self.current_chunk = {
-                                    'size': int(left[: left.index(b'\r\n')], 16),
-                                    'content': left[left.index(b'\r\n') + 2:]
-                                }
-                            else:
-                                self.current_chunk = None
-                        else:
-                            self.current_chunk = None
-                else:
-                    self.current_chunk = {
-                        'size': int(data[: data.index(b'\r\n')], 16),
-                        'content': data[data.index(b'\r\n') + 2:]
-                    }
-
-                if self.current_chunk and self.current_chunk['size'] == 0:
-                    self.finish_loop()
-                else:
-                    self.progressed = random.randrange(20, 80)
+                self.flush_chunk(data)
 
 
 class HTTPCons(object):
@@ -249,6 +261,9 @@ class HTTPCons(object):
         self.is_debug = debug
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect = None
+
+    def __del__(self):
+        self.close()
 
     def close(self):
         """
@@ -331,7 +346,7 @@ class HTTPCons(object):
 
     def __send(self, href, method='GET', headers=None, post_data=None):
         data = """{method} {href} HTTP/1.1\r\n{headers}\r\n\r\n"""
-        UA = "terminal printer user"
+        UA = "TerminalPrinter http client"
         if not headers:
             head = """Host: {}\r\n""".format(self.host)
             head += "User-Agent: " + UA
@@ -345,7 +360,7 @@ class HTTPCons(object):
             if data and type(data) == str:
                 # upload for one time
                 head += "\r\nContent-Length: {}".format(len(post_data))
-                head += "\r\n\r\n{}\r\n".format(post_data)
+                head += "\r\n\r\n{}".format(post_data)
             else:
                 raise URLNotComplete(href, 'POST data')
         elif method == 'GET':
@@ -358,6 +373,8 @@ class HTTPCons(object):
                 for i in post_data:
                     href += '{}={}&'.format(i, post_data[i])
         data = data.format(method=method, href=href, headers=head)
+        if method == 'POST':
+            data = data[:-4]
         if self.is_debug:
             print("\033[01;33mRequest:\033[00m\033[01;31m(DANGER)\033[00m")
             print(data.__repr__().strip("'"))
@@ -453,4 +470,4 @@ if __name__ == '__main__':
             self.assertEqual(hashlib.md5(resp.data).hexdigest(), '276efce035d49f7f3ea168b720075523')
 
 
-    unittest.main()
+    unittest.main(verbosity=2)
