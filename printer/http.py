@@ -77,7 +77,7 @@ class SockFeed(object):
         self.total = 0
         self.disable_progress = False
         self.chunked = False
-        self.current_chunk = None
+        self.current_chunk = b''
         self.title = ''
 
         self.file_handle = None
@@ -113,58 +113,29 @@ class SockFeed(object):
         else:
             self.data += data
 
-    def flush_chunk(self, data=None):
-        if data:
-            if self.current_chunk:
-                self.current_chunk['content'] += data
-            else:
-                size_chunk = data[: data.index(b'\r\n')]
-                if size_chunk:
-                    size = int(size_chunk, 16)
-                    if not size:
-                        return self.finish_loop()
-                    self.current_chunk = {
-                        'size': size,
-                        'content': data[data.index(b'\r\n') + 2:]
-                    }
-                else:
-                    return
-
-        while True:
-            if not self.current_chunk:
-                break
-            oversize = len(self.current_chunk['content']) - self.current_chunk['size']
-            if oversize < 0:
-                break
-            self.save_data(self.current_chunk['content'][: self.current_chunk['size']])
-            left = self.current_chunk['content'][self.current_chunk['size']:]
-            if left:
-                if left.startswith(b'\r\n'):  # 上一个分组不包含结尾 \r\n
-                    real_left = left[2:]
-                    if real_left:
-                        size = int(real_left[: real_left.index(b'\r\n')], 16)
-                        if not size:
-                            return self.finish_loop()
-                        self.current_chunk = {
-                            'size': size,
-                            'content': real_left[real_left.index(b'\r\n') + 2:]
-                        }
-                    else:
-                        self.current_chunk = None
-                else:  # 上一个分组把 \r\n 作为自己的实体
-                    size = int(left[: left.index(b'\r\n')], 16)
-                    if not size:
-                        return self.finish_loop()
-                    self.current_chunk = {
-                        'size': size,
-                        'content': left[left.index(b'\r\n') + 2:]
-                    }
-            else:
-                self.current_chunk = None
+    def flush_chunk(self, data):
+        self.current_chunk += data
         self.progressed = random.randrange(20, 80)
 
+        while len(self.current_chunk) > 10240 or self.current_chunk.endswith(b'0\r\n\r\n'):  # 并不意味着所有分块结束
+            # 开始解析当前chunk cache
+            chunk_head = self.current_chunk[: self.current_chunk.index(b'\r\n')]
+            chunk_left = self.current_chunk[self.current_chunk.index(b'\r\n') + 2:]
+            chunk_size = int(chunk_head, 16)
+            if chunk_size == 0:
+                self.finish_loop()  # 一定要用finish_loop结束请求，否则会出现未关闭的文件 !
+                return True
+            if chunk_size > len(chunk_left):
+                # 说明当前分块没有接收完全
+                return False
+            self.save_data(chunk_left[: chunk_size])
+            self.current_chunk = chunk_left[chunk_size:]
+            if self.current_chunk.startswith(b'\r\n'):
+                # 如果上一个分块没有吃掉最后的 \r\n，则在这里把它剔除
+                self.current_chunk = self.current_chunk[2:]
+
     @bar()
-    def http_response(self, file_path='', skip_body=False, chunk=4094, overwrite=False):
+    def http_response(self, file_path='', skip_body=False, chunk=4096, overwrite=False):
         """
         通过进度条控制获取响应结果
         :param file_path: str => 下载文件位置，若文件已存在，则在前面用数字区分版本
@@ -234,12 +205,7 @@ class SockFeed(object):
                         self.progressed += len(left)
                     else:
 
-                        self.current_chunk = {
-                            'size': int(left[: left.index(b'\r\n')], 16),
-                            'content': left[left.index(b'\r\n') + 2:]
-                        }
-
-                        self.flush_chunk()
+                        self.flush_chunk(left)  # 实体部分以分块大小十六进制数字开头
 
         else:
             if not self.chunked:
