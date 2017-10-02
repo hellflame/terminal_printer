@@ -12,62 +12,67 @@ if sys.version_info.major == 2:
 __all__ = ['font_downloader', 'font_handle']
 
 
-def font_downloader(base_url, font_name, font_path):
+def font_downloader(font_link, font_dir):
     """
     字体下载
-    :param base_url: 下载链接基地址
-    :param font_name: 字体名称
-    :param font_path: 字体保存路径
+    :param font_link: 字体名称
+    :param font_dir: 字体保存路径
     :return:
     """
+    font_name = font_link.split("/")[-1]
+    save_path = os.path.join(font_dir, font_name)
     downloader = http.HTTPCons()
-    downloader.request(base_url + font_name)
+    downloader.request(font_link)
     feed = http.SockFeed(downloader)
     start = time.time()
-    feed.http_response(os.path.join(font_path, font_name), chunk=4096)
-
-    if not int(feed.status['code']) == 200:
-        print("\033[01;31m{}\033[00m not exist !".format(font_name))
-        if feed.file_handle and os.path.isfile(feed.file_handle.name):
-            os.unlink(feed.file_handle.name)
-        return False
-
+    feed.http_response(save_path, chunk=4096)
     end = time.time()
-    size = int(feed.headers.get('Content-Length', 1))
-    print("\033[01;31m{}\033[00m downloaded @speed \033[01;32m{}/s\033[00m"
-          .format(font_name,
-                  http.unit_change(size / (end - start))))
+    if int(feed.status['code']) == 200:
+        size = os.stat(save_path).st_size
+        print("\033[01;31m{}\033[00m downloaded @speed \033[01;32m{}/s\033[00m"
+              .format(font_name,
+                      http.unit_change(size / (end - start))))
+    else:
+        print("\033[01;31m{}\033[00m 下载失败".format(font_name))
     return True
 
 
-def font_handle(font_path, font_list, base_url):
+def font_handle(font_dir, fonts_url, show_prompt=True):
     """
     字体下载管理，如果没有缺失字体依然执行，将提示重新下载所有字体
-    :param font_path: 字体路径
-    :param font_list: 所需字体列表
-    :param base_url: 下载基地址
+    :param font_dir: 字体路径
+    :param fonts_url: 字体链接
+    :param show_prompt: 显示提示信息
     :return:
     """
-    target = [f for f in font_list if not os.path.exists(os.path.join(font_path, f))]
+    target = [fonts_url[f] for f in fonts_url if not os.path.exists(os.path.join(font_dir, f))]
     if not target:
         # 如果字体完整依然执行初始化，则提示删除原有字体目录
-        prompt = "当前字体数据完整，是否继续初始化? y/n "
-        if sys.version_info.major == 2:
-            if not raw_input(prompt).lower().startswith('y'):
-                return False
-        else:
-            if not input(prompt).lower().startswith('y'):
-                return False
-        shutil.rmtree(font_path)
-        target = font_list
+        if show_prompt:
+            # 如果不显示提示信息，则直接删除
+            prompt = "当前字体数据完整，是否继续初始化? y/n "
+            if sys.version_info.major == 2:
+                if not raw_input(prompt).lower().startswith('y'):
+                    return False
+            else:
+                if not input(prompt).lower().startswith('y'):
+                    return False
+        shutil.rmtree(font_dir)
+        target = fonts_url.values()
 
-    if not os.path.exists(font_path):
+    if not os.path.exists(font_dir):
         # 创建字体目录
-        os.makedirs(font_path)
+        os.makedirs(font_dir)
 
     print("Start Downloading {} fonts".format(len(target)))
     for font in target:
-        font_downloader(base_url, font, font_path)
+        font_downloader(font, font_dir)
 
     print("下载完成")
+
+
+if __name__ == '__main__':
+    import painter
+    font_handle(painter.FONT_DIR, painter.FONT_URL, show_prompt=False)
+
 

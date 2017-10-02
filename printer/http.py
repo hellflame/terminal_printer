@@ -8,6 +8,7 @@ import ssl
 import os
 
 from subprocess import check_output
+from itertools import cycle
 
 __all__ = ['SockFeed', 'HTTPCons', 'unit_change']
 
@@ -23,6 +24,7 @@ def bar(width=0, fill='#'):
             if not hasattr(self, 'progressed') or not hasattr(self, 'total'):
                 print("progressed, total attribute is needed!")
                 return
+            progress_cursor = 1
             while self.progressed <= self.total:
                 func(self, *args, **kwargs)
                 if not hasattr(self, 'disable_progress') or not self.disable_progress:
@@ -37,26 +39,71 @@ def bar(width=0, fill='#'):
                             w = 50
                     else:
                         w = width
-                    percent = self.progressed / float(self.total)
-                    # marks count
-                    percent_show = "{}%".format(int(percent * 100))
-                    # marks width
-                    title = getattr(self, 'title', '')
-                    mark_width = w - len(percent_show) - 5 - len(title) - 2
-                    mark_count = int(math.floor(mark_width * percent))
-                    sys.stdout.write(
-                        ' ' + title + ' ' +
-                        '[' + fill * mark_count + ' ' * (mark_width - mark_count) + ']  ' + percent_show + '\r')
+                    if not self.chunked:
+                        percent = self.progressed / float(self.total)
+                        # marks count
+                        percent_show = "{}%".format(int(percent * 100))
+                        # marks width
+                        title = getattr(self, 'title', '')
+                        mark_width = w - len(percent_show) - len(title) - 7
+                        mark_count = int(math.floor(mark_width * percent))
+                        sys.stdout.write(
+                            ' ' + title + ' ' +
+                            '[' + fill * mark_count + ' ' * (mark_width - mark_count) + ']  ' + percent_show + '\r')
+                    else:
+                        progress_cursor += 1
+                        title = getattr(self, 'title', '')
+                        mark_width = w - str_len(title) - 6
+                        sys.stdout.write(" " + title + " " +
+                                         "[" +
+                                         "".join([i for _, i in zip(range(mark_width),
+                                                                    cycle([">> ", " >>", "> >"][progress_cursor % 3]))])
+                                         + "] \r")
+
                     sys.stdout.flush()
+
                     if self.progressed == self.total:
                         sys.stdout.write(" " * w + '\r')
-                        sys.stdout.flush()
                         break
                 else:
                     if self.progressed == self.total:
                         break
         return arguments
     return function_wrapper
+
+
+def unit_change(target):
+    """
+    单位换算
+    :param target: unsigned int
+    :return: str
+    """
+    if target < 0:
+        return str(target)
+    unit_list = ('B', 'KB', 'MB', 'GB', 'TB')
+    index = 0
+    target = float(target)
+    while target > 1024:
+        index += 1
+        target /= 1024
+    return "{} {}".format(round(target, 2), unit_list[index])
+
+
+def str_len(s):
+    """
+    获取占用等宽字体终端实际宽度，适用`Monaco`等其他等宽字体字体
+    :param s:
+    :return:
+    """
+    length = 0
+    for i in s:
+        # Chinese,Japanese,Korean character utf8 range
+        # Test Font `Monaco`
+        if 3105 <= ord(i) <= 65535:
+            length += 2
+        else:
+            length += 1
+    return length
 
 
 class SockFeed(object):
@@ -196,7 +243,6 @@ class SockFeed(object):
                 else:
                     self.total = 100
                     self.chunked = True
-
                 left = self.raw_head[self.raw_head.index(b"\r\n\r\n") + 4:]
 
                 if left:

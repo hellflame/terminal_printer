@@ -56,7 +56,7 @@ def parser():
 def command(args, parse):
     # print("\n".join(['{} => {}'.format(k, v) for k, v in args.__dict__.items()]))
     if args.init:
-        resource.font_handle(painter.FONT_DIR, painter.FONT_LIST, 'http://7xqh1q.dl1.z0.glb.clouddn.com/')
+        resource.font_handle(painter.FONT_DIR, painter.FONT_URL)
     elif args.version:
         print("TerminalPrinter v" + painter.__version__)
     elif args.picture:
