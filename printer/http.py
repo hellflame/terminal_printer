@@ -53,12 +53,13 @@ def bar(width=0, fill='#'):
                     else:
                         progress_cursor += 1
                         title = getattr(self, 'title', '')
-                        mark_width = w - str_len(title) - 6
+                        chunk_recved = unit_change(self.chunk_recved)
+                        mark_width = w - str_len(title) - len(chunk_recved) - 6
                         sys.stdout.write(" " + title + " " +
                                          "[" +
                                          "".join([i for _, i in zip(range(mark_width),
                                                                     cycle([">> ", " >>", "> >"][progress_cursor % 3]))])
-                                         + "] \r")
+                                         + "] {}\r".format(chunk_recved))
 
                     sys.stdout.flush()
 
@@ -86,7 +87,7 @@ def unit_change(target):
     while target > 1024:
         index += 1
         target /= 1024
-    return "{} {}".format(round(target, 2), unit_list[index])
+    return "{:.2f} {}".format(round(target, 2), unit_list[index])
 
 
 def str_len(s):
@@ -125,6 +126,7 @@ class SockFeed(object):
         self.disable_progress = False
         self.chunked = False
         self.current_chunk = b''
+        self.chunk_recved = 0
         self.title = ''
 
         self.file_handle = None
@@ -162,7 +164,6 @@ class SockFeed(object):
 
     def flush_chunk(self, data):
         self.current_chunk += data
-        self.progressed = random.randrange(20, 80)
 
         while len(self.current_chunk) > 10240 or self.current_chunk.endswith(b'0\r\n\r\n'):  # 并不意味着所有分块结束
             # 开始解析当前chunk cache
@@ -175,7 +176,9 @@ class SockFeed(object):
             if chunk_size > len(chunk_left):
                 # 说明当前分块没有接收完全
                 return False
-            self.save_data(chunk_left[: chunk_size])
+            data = chunk_left[: chunk_size]
+            self.chunk_recved += len(data)
+            self.save_data(data)
             self.current_chunk = chunk_left[chunk_size:]
             if self.current_chunk.startswith(b'\r\n'):
                 # 如果上一个分块没有吃掉最后的 \r\n，则在这里把它剔除
