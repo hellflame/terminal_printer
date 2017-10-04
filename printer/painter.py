@@ -1,5 +1,5 @@
 # coding=utf8
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 from PIL import Image, ImageFont, ImageDraw
 from os import popen, path
 import sys
@@ -148,8 +148,9 @@ def text_drawer(text, fonts=None):
 
     try:
         font = ImageFont.truetype(font, 20)
-    except OSError:
+    except IOError:
         print("字体文件损坏，请使用其他字体或重新初始化")
+        return None
     except:
         target = path.join(FONT_DIR, FONT_LIST[0])
         if path.exists(target):

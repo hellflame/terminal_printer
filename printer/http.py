@@ -1,5 +1,5 @@
 # coding=utf8
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import socket
 import math
 import sys
@@ -8,9 +8,10 @@ import os
 
 from subprocess import check_output
 from itertools import cycle
+from functools import wraps
 from time import time
 
-__all__ = ['SockFeed', 'HTTPCons', 'unit_change']
+__all__ = ['SockFeed', 'HTTPCons', 'unit_change', 'bar']
 
 
 def bar(width=0, fill='#'):
@@ -20,12 +21,13 @@ def bar(width=0, fill='#'):
     :param fill: 进度填充字符
     """
     def function_wrapper(func):
+        @wraps(func)
         def arguments(self, *args, **kwargs):
             if not hasattr(self, 'progressed') or not hasattr(self, 'total'):
                 print("progressed, total attribute is needed!")
                 return
             progress_cursor = 1
-            last_update = time()
+            last_update = 0
             while self.progressed <= self.total:
                 func(self, *args, **kwargs)
                 if not hasattr(self, 'disable_progress') or not self.disable_progress:
@@ -33,26 +35,28 @@ def bar(width=0, fill='#'):
                         print("Total Length Invalid !")
                         self.progressed = self.total = 1
                         break
-                    if not width:
-                        try:
-                            w = int(check_output("stty size", stderr=None, shell=True).split(b" ")[1])
-                        except:
-                            w = 50
-                    else:
-                        w = width
-                    if time() - last_update > .1:  # 刷新间隔 0.1s
-                        if not self.chunked:
+                    if time() - last_update > .1:
+                        if not width:
+                            try:
+                                w = int(check_output("stty size", stderr=None, shell=True).split(b" ")[1])
+                            except:
+                                w = 50
+                        else:
+                            w = width
+                        if not hasattr(self, 'chunked') or not self.chunked:
+                            # 普通编码进度条
                             percent = self.progressed / float(self.total)
                             # marks count
                             percent_show = "{}%".format(int(percent * 100))
                             # marks width
                             title = getattr(self, 'title', '')
-                            mark_width = w - len(percent_show) - len(title) - 7
+                            mark_width = w - len(percent_show) - str_len(title) - 7
                             mark_count = int(math.floor(mark_width * percent))
                             sys.stdout.write(
                                 ' ' + title + ' ' +
                                 '[' + fill * mark_count + ' ' * (mark_width - mark_count) + ']  ' + percent_show + '\r')
                         else:
+                            # 分块编码进度条
                             progress_cursor += 1
                             title = getattr(self, 'title', '')
                             chunk_recved = unit_change(self.chunk_recved)
@@ -179,9 +183,9 @@ class SockFeed(object):
             if chunk_size > len(chunk_left):
                 # 说明当前分块没有接收完全
                 return False
-            data = chunk_left[: chunk_size]
-            self.chunk_recved += len(data)
-            self.save_data(data)
+            valid_data = chunk_left[: chunk_size]
+            self.chunk_recved += len(valid_data)
+            self.save_data(valid_data)
             self.current_chunk = chunk_left[chunk_size:]
             if self.current_chunk.startswith(b'\r\n'):
                 # 如果上一个分块没有吃掉最后的 \r\n，则在这里把它剔除
@@ -249,6 +253,7 @@ class SockFeed(object):
                 else:
                     self.total = 100
                     self.chunked = True
+
                 left = self.raw_head[self.raw_head.index(b"\r\n\r\n") + 4:]
 
                 if left:

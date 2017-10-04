@@ -1,9 +1,11 @@
 # coding=utf8
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os
 import argparse
 from . import painter
 from . import resource
+
+__all__ = ['parser']
 
 
 def parser():

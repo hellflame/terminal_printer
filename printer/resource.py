@@ -1,5 +1,5 @@
 # coding=utf8
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os
 import sys
 import time
@@ -72,7 +72,7 @@ def font_handle(font_dir, fonts_url, show_prompt=True):
 
 
 if __name__ == '__main__':
-    import painter
+    from printer import painter
     font_handle(painter.FONT_DIR, painter.FONT_URL, show_prompt=False)
 
 
