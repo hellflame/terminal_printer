@@ -71,15 +71,16 @@ $ terminalprint -v # terminalprint --version
 
 > 选择的字体都是可以支持大部分中文的字体，这5个字体是大多数系统没有安装的第三方字体，所以把这5个字体放在了用户目录下的一个隐藏文件目录，`~/.terminal_fonts/` ，5个字体的下载路径分别为：(可以手动下载保存在指定路径)
 
-```
-http://7xqh1q.dl1.z0.glb.clouddn.com/Haibaoyuanyuan.ttf
-http://7xqh1q.dl1.z0.glb.clouddn.com/fengyun.ttf
-http://7xqh1q.dl1.z0.glb.clouddn.com/huakangbold.otf
-http://7xqh1q.dl1.z0.glb.clouddn.com/letter.ttf
-http://7xqh1q.dl1.z0.glb.clouddn.com/shuyan.ttf
-```
+由于GFW和域名审核等问题，现在将字体资源放在 [fonts](./fonts)
 
-当然，可以直接通过以下命令初始化字体库:
+~~http://7xqh1q.dl1.z0.glb.clouddn.com/Haibaoyuanyuan.ttf~~
+~~http://7xqh1q.dl1.z0.glb.clouddn.com/fengyun.ttf~~
+~~http://7xqh1q.dl1.z0.glb.clouddn.com/huakangbold.otf~~
+~~http://7xqh1q.dl1.z0.glb.clouddn.com/letter.ttf~~
+~~http://7xqh1q.dl1.z0.glb.clouddn.com/shuyan.ttf~~
+
+
+当然，可以直接通过以下命令初始化字体库: (暂时不可用)
 
 ```bash
 $ terminalprint -i # terminalprint --init
