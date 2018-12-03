@@ -74,9 +74,13 @@ $ terminalprint -v # terminalprint --version
 由于GFW和域名审核等问题，现在将字体资源放在 [fonts](./fonts)
 
 ~~http://7xqh1q.dl1.z0.glb.clouddn.com/Haibaoyuanyuan.ttf~~
+
 ~~http://7xqh1q.dl1.z0.glb.clouddn.com/fengyun.ttf~~
+
 ~~http://7xqh1q.dl1.z0.glb.clouddn.com/huakangbold.otf~~
+
 ~~http://7xqh1q.dl1.z0.glb.clouddn.com/letter.ttf~~
+
 ~~http://7xqh1q.dl1.z0.glb.clouddn.com/shuyan.ttf~~
 
 
