@@ -5,9 +5,8 @@ from os import popen, path
 import sys
 import random
 
-__all__ = ['make_terminal_img', 'get_img', 'text_drawer']
 __author__ = 'hellflame'
-__version__ = '1.3.4'
+__version__ = '1.3.5'
 __url__ = 'https://github.com/hellflame/terminal_printer'
 
 FONT_LIST = ['shuyan.ttf',
@@ -16,12 +15,14 @@ FONT_LIST = ['shuyan.ttf',
              'fengyun.ttf',
              'huakangbold.otf']
 
+_font_prefix = "https://raw.githubusercontent.com/hellflame/terminal_printer/808004a7cd41b4383bfe6aa310c491c69d9b2556/fonts/"
+
 FONT_URL = {
-    'shuyan.ttf': "https://static.hellflame.net/resource/5fbbb30e24e1e4a73131ca6d34c9367f/shuyan.ttf",
-    "letter.ttf": "https://static.hellflame.net/resource/9d5564ca0df166fb62eced26a5dd4684/letter.ttf",
-    "Haibaoyuanyuan.ttf": "https://static.hellflame.net/resource/9be12b035473465dae78bfc654cab9f4/Haibaoyuanyuan.ttf",
-    "fengyun.ttf": "https://static.hellflame.net/resource/2cb9b1fe27ad386af51d517056300230/fengyun.ttf",
-    "huakangbold.otf": "https://static.hellflame.net/resource/9fd42f55c0f8abec447a40aeed2d638c/huakangbold.otf"
+    'shuyan.ttf': _font_prefix + "shuyan.ttf",
+    "letter.ttf": _font_prefix + "letter.ttf",
+    "Haibaoyuanyuan.ttf": _font_prefix + "Haibaoyuanyuan.ttf",
+    "fengyun.ttf": _font_prefix + "fengyun.ttf",
+    "huakangbold.otf": _font_prefix + "huakangbold.otf"
 }
 
 FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
