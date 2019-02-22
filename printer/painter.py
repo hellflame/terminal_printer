@@ -5,9 +5,6 @@ from os import popen, path
 import sys
 import random
 
-__author__ = 'hellflame'
-__version__ = '1.3.5'
-__url__ = 'https://github.com/hellflame/terminal_printer'
 
 FONT_LIST = ['shuyan.ttf',
              'letter.ttf',

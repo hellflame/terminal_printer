@@ -12,7 +12,7 @@ def get_modules():
 
     for _, _, f in os.walk(os.path.dirname(__file__) or '.'):
         for i in filter(lambda x: fnmatch.fnmatch(x, '*_test.py'), f):
-            modules.append('printer.test.' + os.path.basename(i)[:-3])
+            modules.append('test.' + os.path.basename(i)[:-3])
         break  # just first level
 
     return modules
@@ -26,5 +26,6 @@ def tester(modules):
 
 
 if __name__ == '__main__':
+    print(get_modules())
     tester(get_modules())
 

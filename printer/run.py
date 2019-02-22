@@ -2,8 +2,10 @@
 from __future__ import print_function, absolute_import
 import os
 import argparse
-from . import painter
-from . import resource
+
+from printer import __url__
+from printer import painter
+from printer import resource
 
 __all__ = ['parser']
 

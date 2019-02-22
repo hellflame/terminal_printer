@@ -1,8 +1,7 @@
 # coding=utf8
-__author__ = 'hellflame'
 
-from setuptools import setup, find_packages
-from printer.painter import __version__, __author__, __url__
+from setuptools import setup
+from printer import __version__, __author__, __url__
 
 setup(
     name='TerminalPrinter',
@@ -13,7 +12,7 @@ setup(
     author=__author__,
     author_email='hellflamedly@gmail.com',
     url=__url__,
-    packages=find_packages(),
+    packages=["printer"],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
