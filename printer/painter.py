@@ -1,9 +1,14 @@
 # coding=utf8
-from __future__ import print_function, absolute_import
-from PIL import Image, ImageFont, ImageDraw
-from os import popen, path
 import sys
 import random
+from os import popen, path
+
+from PIL import Image, ImageFont, ImageDraw
+
+
+__author__ = 'hellflame'
+__version__ = '1.5.0'
+__url__ = 'https://github.com/hellflame/terminal_printer'
 
 
 FONT_LIST = ['shuyan.ttf',
@@ -12,14 +17,11 @@ FONT_LIST = ['shuyan.ttf',
              'fengyun.ttf',
              'huakangbold.otf']
 
-_font_prefix = "https://raw.githubusercontent.com/hellflame/terminal_printer/808004a7cd41b4383bfe6aa310c491c69d9b2556/fonts/"
+_font_prefix = "https://raw.githubusercontent.com/hellflame/terminal_printer/" \
+               "808004a7cd41b4383bfe6aa310c491c69d9b2556/fonts/"
 
 FONT_URL = {
-    'shuyan.ttf': _font_prefix + "shuyan.ttf",
-    "letter.ttf": _font_prefix + "letter.ttf",
-    "Haibaoyuanyuan.ttf": _font_prefix + "Haibaoyuanyuan.ttf",
-    "fengyun.ttf": _font_prefix + "fengyun.ttf",
-    "huakangbold.otf": _font_prefix + "huakangbold.otf"
+    f: _font_prefix + f for f in FONT_LIST
 }
 
 FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
@@ -73,8 +75,6 @@ def make_terminal_img(img, filter_type=None, width=None,
     width, height = img.size
     pix = img.load()
 
-    # img.save("./t.png")
-
     if gray:
         def render_pix(x, y):
             if filter_type:
@@ -88,7 +88,7 @@ def make_terminal_img(img, filter_type=None, width=None,
     else:
         def render_pix(x, y):
             # 如果这里也用和灰度图一样的处理方法的话，会显得很乱，终端中的颜色也难以显示出来
-            return '\033[0;38;2;%s;%s;%sm' % pix[x, y] + MESS_FILTERS[filter_type]
+            return '\033[0;38;2;%s;%s;%sm' % pix[x, y][:3] + MESS_FILTERS[filter_type]
 
     if type(dye) is int:
         # 特定颜色绘制

@@ -1,7 +1,7 @@
 # coding=utf8
 
 from setuptools import setup
-from printer import __version__, __author__, __url__
+from printer.painter import __version__, __author__, __url__
 
 setup(
     name='TerminalPrinter',
@@ -14,7 +14,7 @@ setup(
     url=__url__,
     packages=["printer"],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',

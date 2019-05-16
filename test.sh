@@ -1,9 +1,7 @@
 #!/bin/bash
 
-MODULE_NAME=printer
-
 function module_exist {
-    if [ -f "./$MODULE_NAME/test/$1_test.py" ]; then
+    if [ -f "./test/$1_test.py" ]; then
         return 0
     fi
     return 1
@@ -17,9 +15,9 @@ function test_module {
         echo "using $path"
         if module_exist $module; then
             echo "Testing $2"
-            eval "$path -m $MODULE_NAME.test.$2_test "
+            eval "$path -m test.$2_test "
         else
-            eval "$path -m $MODULE_NAME.test.run"
+            eval "$path -m test.run"
         fi
     else
         echo "$py 不可执行"
@@ -35,24 +33,12 @@ function test {
 
     else
         echo "自动测试"
-        if [ -x "`command -v python2`" ]; then
-
-            echo "Python2 Test"
+        if [ -x "`command -v python`" ]; then
             python2 --version
-            command python2 -m $MODULE_NAME.test.run
+            command python2 -m test.run
             echo "----------"
 
         fi
-
-        if [ -x "`command -v python3`" ]; then
-
-            echo "Python3 Test"
-            python3 --version
-            python3 -m $MODULE_NAME.test.run
-            echo "----------"
-
-        fi
-
     fi
 }
 

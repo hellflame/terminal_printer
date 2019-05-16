@@ -1,5 +1,4 @@
 # coding=utf8
-from __future__ import absolute_import, division, print_function
 
 import os
 import fnmatch
@@ -26,6 +25,5 @@ def tester(modules):
 
 
 if __name__ == '__main__':
-    print(get_modules())
     tester(get_modules())
 

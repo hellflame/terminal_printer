@@ -1,10 +1,11 @@
 # coding=utf8
-from __future__ import print_function, absolute_import
 import os
 import sys
 import time
 import shutil
-from . import http
+
+from printer.http import HTTPCons, SockFeed
+
 if sys.version_info.major == 2:
     reload(sys)
     sys.setdefaultencoding("utf8")
@@ -21,9 +22,9 @@ def font_downloader(font_link, font_dir):
     """
     font_name = font_link.split("/")[-1]
     save_path = os.path.join(font_dir, font_name)
-    downloader = http.HTTPCons()
+    downloader = HTTPCons()
     downloader.request(font_link)
-    feed = http.SockFeed(downloader)
+    feed = SockFeed(downloader)
     start = time.time()
     feed.http_response(save_path, chunk=4096)
     end = time.time()
@@ -51,12 +52,15 @@ def font_handle(font_dir, fonts_url, show_prompt=True):
         if show_prompt:
             # 如果不显示提示信息，则直接删除
             prompt = "当前字体数据完整，是否继续初始化? y/n "
-            if sys.version_info.major == 2:
-                if not raw_input(prompt).lower().startswith('y'):
-                    return False
-            else:
-                if not input(prompt).lower().startswith('y'):
-                    return False
+            try:
+                if sys.version_info.major == 2:
+                    if not raw_input(prompt).lower().startswith('y'):
+                        return False
+                else:
+                    if not input(prompt).lower().startswith('y'):
+                        return False
+            except KeyboardInterrupt:
+                exit(0)
         shutil.rmtree(font_dir)
         target = fonts_url.values()
 
