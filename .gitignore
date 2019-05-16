@@ -14,4 +14,4 @@ sdist
 develop-eggs
 
 # test picture
-*.png
+*.DS_Store
