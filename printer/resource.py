@@ -4,7 +4,7 @@ import sys
 import time
 import shutil
 
-from printer.http import HTTPCons, SockFeed
+from printer.http import HTTPCons, SockFeed, unit_change
 
 if sys.version_info.major == 2:
     reload(sys)
@@ -32,7 +32,7 @@ def font_downloader(font_link, font_dir):
         size = os.stat(save_path).st_size
         print("\033[01;31m{}\033[00m downloaded @speed \033[01;32m{}/s\033[00m"
               .format(font_name,
-                      http.unit_change(size / (end - start))))
+                      unit_change(size / (end - start))))
     else:
         print("\033[01;31m{}\033[00m 下载失败".format(font_name))
     return True

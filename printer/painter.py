@@ -7,7 +7,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 
 __author__ = 'hellflame'
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 __url__ = 'https://github.com/hellflame/terminal_printer'
 
 
