@@ -86,10 +86,18 @@ def make_terminal_img(img, filter_type=None, width=None,
         image_map = ImageMap()
         white_lines = 0
         after_h = 0
+        is_start_line = True
         for h in range(height):
             if all([pix[w, h] == 255 for w in range(width)]):
-                white_lines += 1
-                continue
+                if is_start_line:
+                    # skip first white line
+                    is_start_line = False
+                elif h == height - 2:
+                    # skip last white line
+                    pass
+                else:
+                    white_lines += 1
+                    continue
             for w in range(width):
                 image_map[w, after_h] = pix[w, h]
             after_h += 1
