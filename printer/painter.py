@@ -6,11 +6,6 @@ from os import popen, path
 from PIL import Image, ImageFont, ImageDraw
 
 
-__author__ = 'hellflame'
-__version__ = '1.5.1'
-__url__ = 'https://github.com/hellflame/terminal_printer'
-
-
 FONT_LIST = ['shuyan.ttf',
              'letter.ttf',
              'Haibaoyuanyuan.ttf',
@@ -41,9 +36,20 @@ except:
     DEFAULT_SIZE = 50, 30  # width, height
 
 
+class ImageMap(object):
+    def __init__(self):
+        self._image = {}
+
+    def __setitem__(self, key, value):
+        self._image[key] = value
+
+    def __getitem__(self, key):
+        return self._image[key]
+
+
 def make_terminal_img(img, filter_type=None, width=None,
                       height=None, dye=None, reverse=False,
-                      keep_ratio=False, gray=True):
+                      keep_ratio=False, gray=True, strip_white=False):
     """
     在终端输出字符图片
     :param img: 图像
@@ -54,6 +60,7 @@ def make_terminal_img(img, filter_type=None, width=None,
     :param reverse: 是否反色
     :param keep_ratio: 是否保持比例
     :param gray: 如果处理图片，是否转换为灰度图
+    :param strip_white: 是否删除(文字打印)模式下的空白行
     :return: 图像字符
     """
     if not img:
@@ -74,6 +81,20 @@ def make_terminal_img(img, filter_type=None, width=None,
             img = img.resize((int(size[0] * ratio), int(size[1] * ratio)))
     width, height = img.size
     pix = img.load()
+
+    if strip_white:
+        image_map = ImageMap()
+        white_lines = 0
+        after_h = 0
+        for h in range(height):
+            if all([pix[w, h] == 255 for w in range(width)]):
+                white_lines += 1
+                continue
+            for w in range(width):
+                image_map[w, after_h] = pix[w, h]
+            after_h += 1
+        height = after_h
+        pix = image_map
 
     if gray:
         def render_pix(x, y):

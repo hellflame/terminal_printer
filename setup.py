@@ -1,7 +1,7 @@
 # coding=utf8
 
 from setuptools import setup
-from printer.painter import __version__, __author__, __url__
+from printer.version import __version__, __author__, __url__
 
 setup(
     name='TerminalPrinter',

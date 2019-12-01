@@ -1,11 +1,13 @@
 # coding=utf8
+
 import os
 import argparse
 
-from printer.painter import __url__, __version__, MESS_FILTERS, FONT_LIST, FONT_DIR, \
+from version import __url__, __version__
+from painter import MESS_FILTERS, FONT_LIST, FONT_DIR, \
     FONT_URL, make_terminal_img, text_drawer, get_img
 
-from printer.resource import font_handle
+from resource import font_handle
 
 __all__ = ['parser']
 
@@ -29,7 +31,8 @@ def command(args, parse):
         print(make_terminal_img(
             text_drawer(args.text, args.font),
             filter_type=args.filter, width=args.width, height=args.height,
-            dye=args.color, reverse=not args.reverse, keep_ratio=False, gray=True))
+            dye=args.color, reverse=not args.reverse, keep_ratio=False, gray=True,
+            strip_white=True))
     else:
         parse.print_help()
 
