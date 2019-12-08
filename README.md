@@ -4,6 +4,8 @@
 
 (看惯了Retina，可能也想看看高清的马赛克)
 
+[golang版本](https://github.com/hellflame/printer)
+
 ### 安装
 
 ```bash
