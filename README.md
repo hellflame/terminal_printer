@@ -9,11 +9,11 @@
 ### 安装
 
 ```bash
-$ pip install terminalprinter --upgrade
+$ pip install -U terminalprinter
 # or
-$ sudo install terminalprinter --upgrade
+$ sudo install -U terminalprinter
 # if permission issue happened on mac os
-$ pip install terminalprinter --user --upgrade
+$ pip install -U terminalprinter --user
 ```
 
 ### 使用
@@ -231,11 +231,15 @@ $ ternimalprint -kr [pic]
 
 http下载库优化，包括进度条输出以及单位转换宽度固定
 
-* v1.5.0
+- v1.5.0
 
   优化代码结构
 
   修复带透明度图片输出bug
+
+- v1.6.0
+
+  兼容py3下面的问题
 
 ------
 
