@@ -3,11 +3,10 @@
 import os
 import argparse
 
-from version import __url__, __version__
-from painter import MESS_FILTERS, FONT_LIST, FONT_DIR, \
+from printer.version import __url__, __version__
+from printer.painter import MESS_FILTERS, FONT_LIST, FONT_DIR, \
     FONT_URL, make_terminal_img, text_drawer, get_img
-
-from resource import font_handle
+from printer.resource import font_handle
 
 __all__ = ['parser']
 
