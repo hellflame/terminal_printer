@@ -21,7 +21,7 @@ def font_downloader(font_link, font_dir):
     :param font_dir: 字体保存路径
     :return:
     """
-    font_name = font_link.split("/")[-1]
+    font_name = os.path.basename(font_link)
     save_path = os.path.join(font_dir, font_name)
     downloader = HTTPCons()
     downloader.request(font_link)
@@ -52,7 +52,7 @@ def font_handle(font_dir, fonts_url, show_prompt=True):
         # 如果字体完整依然执行初始化，则提示删除原有字体目录
         if show_prompt:
             # 如果不显示提示信息，则直接删除
-            prompt = "当前字体数据完整，是否继续初始化? y/n "
+            prompt = "当前字体数据完整，是否删除后继续初始化? y/n "
             try:
                 if sys.version_info.major == 2:
                     if not raw_input(prompt).lower().startswith('y'):
