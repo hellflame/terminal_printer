@@ -39,9 +39,9 @@ def command(args, parse):
 def parser():
     parse = argparse.ArgumentParser(description="Terminal Printer",
                                     formatter_class=argparse.RawTextHelpFormatter,
-                                    epilog="初次使用，需要初始化字体下载"
-                                           "\r\n执行 terminalprint -i 初始化"
-                                           "\r\n更多帮助信息请访问: " + __url__)
+                                    epilog="首次进行文字处理\r\n"
+                                           "需要执行 terminalprint -i 初始化或指定字体\r\n"
+                                           "更多帮助信息请参考: " + __url__)
 
     def usable_color(s):
         if s.isdigit():

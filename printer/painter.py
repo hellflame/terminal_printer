@@ -1,6 +1,7 @@
 # coding=utf8
 import sys
 import random
+import subprocess
 from os import popen, path
 
 from PIL import Image, ImageFont, ImageDraw
@@ -20,7 +21,8 @@ FONT_URL = {
 }
 
 FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
-
+DEFAULT_SIZE = 50, 30  # width, height
+_SIZE_CMD = "stty size"
 
 if sys.version_info.major == 2:
     reload(sys)
@@ -31,9 +33,14 @@ else:
     unicode = lambda s: s
 
 try:
-    DEFAULT_SIZE = tuple(reversed([int(s) for s in popen("stty size").read().split()]))
-except:
-    DEFAULT_SIZE = 50, 30  # width, height
+    _code, _output = subprocess.getstatusoutput(_SIZE_CMD)
+    if _code == 0:
+        DEFAULT_SIZE = [int(s) for s in _output.split(' ')][::-1]
+except AttributeError:  # python2
+    try:
+        DEFAULT_SIZE = [int(s) for s in popen(_SIZE_CMD).read().split(' ')][::-1]
+    except:
+        pass
 
 
 class ImageMap(object):
@@ -173,10 +180,13 @@ def text_drawer(text, fonts=None):
     else:
         font = fonts
 
+    if not path.exists(font) and path.isfile(font):
+        print("字体文件不存在({})，请使用其他字体".format(font))
+        return None
     try:
         font = ImageFont.truetype(font, 20)
     except IOError:
-        print("字体文件损坏，请使用其他字体或重新初始化")
+        print("字体文件损坏，请使用其他字体")
         return None
     except:
         target = path.join(FONT_DIR, FONT_LIST[0])
