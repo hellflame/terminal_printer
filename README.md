@@ -84,7 +84,7 @@ $ terminalprint -v # terminalprint --version
 
 > 选择的字体都是可以支持大部分中文的字体，这5个字体是大多数系统没有安装的第三方字体，所以把这5个字体放在了用户目录下的一个隐藏文件目录，`~/.terminal_fonts/` ，5个字体的下载路径分别为：(可以手动下载保存在指定路径)
 
-由于GFW和域名审核等问题，现在将字体资源放在 [fonts](./fonts)
+现在字体资源放在 [fonts](./fonts) ，也可点击 [下载完整字体包](./images/fonts.tar.gz)，解压将5个字体文件放到 `~/.terminal_fonts/` 即可
 
 当然，可以直接通过以下命令初始化字体库:
 
