@@ -3,19 +3,22 @@
 import os
 import argparse
 
-from printer.version import __url__, __version__
+from printer.version import __url__
 from printer.painter import MESS_FILTERS, FONT_LIST, FONT_DIR, \
     FONT_URL, make_terminal_img, text_drawer, get_img
 from printer.resource import font_handle
+from printer.utils import print_version, print_debug
 
 __all__ = ['parser']
 
 
 def command(args, parse):
+    if args.debug:
+        print_debug(args)
     if args.init:
         font_handle(FONT_DIR, FONT_URL)
     elif args.version:
-        print("TerminalPrinter v{}".format(__version__))
+        print_version()
     elif args.picture:
         pic_path = args.picture
         if os.path.exists(pic_path) and os.path.isfile(pic_path):
@@ -69,6 +72,7 @@ def parser():
     basic = parse.add_argument_group("basics")
     basic.add_argument("-i", "--init", action="store_true", help="初始化程序，下载字体")
     basic.add_argument("-v", '--version', action="store_true", help="输出版本信息")
+    basic.add_argument("--debug", action="store_true", help="输出调试信息")
 
     picture = parse.add_argument_group("pictures")
     picture.add_argument("picture", nargs="?", help="可选的图片")

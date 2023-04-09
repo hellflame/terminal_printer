@@ -22,7 +22,7 @@ $ pip install -U terminalprinter --user
 $ terminalprint
 ```
 
-以上命令，将输出默认的字符图到终端(命令太长？为什么不用*tab*)
+以上命令，将输出默认的字符图到终端(命令太长？可使用用 *tab* 进行自动补全)
 
 ![](./images/sample.png)
 
@@ -37,37 +37,42 @@ $ terminalprint -h
 得到类似输出:
 
 ```bash
-usage: terminalprint [-h] [-i] [-v] [-kr] [-t TEXT] [-c i] [-g] [-F path] [-r]
-                     [-W WIDTH] [-H HEIGHT] [-f i]
-                     [picture]
+usage: run.py [-h] [-i] [-v] [--debug] [-kr] [-t TEXT] [-c i] [-g] [-F path]
+              [-r] [-W w] [-H h] [-f i]
+              [picture]
 
 Terminal Printer
 
 optional arguments:
   -h, --help            show this help message and exit
+
 basics:
   -i, --init            初始化程序，下载字体
   -v, --version         输出版本信息
+  --debug               输出调试信息
+
 pictures:
   picture               可选的图片
   -kr, --keep-ratio     保持图片比例
+
 text:
   -t TEXT, --text TEXT  设置将要处理的文本内容，默认为 HellFlame
   -c i, --color i       设置颜色
   -g, --gray            图像转换为灰度图(若指定图)
   -F path, --font path  设置书写字体
   -r, --reverse         反色(对彩色输出无效)
+
 common:
-  -W WIDTH, --width WIDTH
-                        设置输出宽度，需要与高度一起设置
-  -H HEIGHT, --height HEIGHT
-                        设置输出高度，需要与宽度一起设置
+  -W w, --width w       设置输出宽度，需要与高度一起设置
+  -H h, --height h      设置输出高度，需要与宽度一起设置
   -f i, --filter i      设置打印填充方式
 
-初次使用，需要初始化字体下载
-执行 terminalprint -i 初始化
-更多帮助信息请访问: https://github.com/hellflame/terminal_printer
+首次进行文字处理
+需要执行 terminalprint -i 初始化或指定字体
+更多帮助信息请参考: https://github.com/hellflame/terminal_printer
 ```
+
+> v2.1.0 新增 `--debug` 参数，可与其他命令一起使用，输出调试信息
 
 #### ii. 版本信息
 
@@ -240,6 +245,14 @@ http下载库优化，包括进度条输出以及单位转换宽度固定
 - v1.6.0
 
   兼容py3下面的问题
+
+- v2.0.0
+
+  易用性更新
+
+- v2.1.0
+
+  新增调试入口
 
 ------
 
