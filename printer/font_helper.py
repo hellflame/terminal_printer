@@ -4,6 +4,9 @@ import os
 import sys
 import time
 import shutil
+from os import path
+
+from PIL import ImageFont
 
 from printer.http import HTTPCons, SockFeed, unit_change
 
@@ -11,7 +14,45 @@ if sys.version_info.major == 2:
     reload(sys)
     sys.setdefaultencoding("utf8")
 
-__all__ = ['font_downloader', 'font_handle']
+# __all__ = ['font_downloader', 'font_handle']
+
+FONT_LIST = ['shuyan.ttf',
+             'letter.ttf',
+             'Haibaoyuanyuan.ttf',
+             'fengyun.ttf',
+             'huakangbold.otf']
+
+_font_prefix = "https://raw.githubusercontent.com/hellflame/terminal_printer/" \
+               "808004a7cd41b4383bfe6aa310c491c69d9b2556/fonts/"
+
+FONT_URL = {
+    f: _font_prefix + f for f in FONT_LIST
+}
+
+FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
+
+
+def choose_font(choice):
+    if choice.isdigit():
+        choice = int(choice)
+        font = path.join(FONT_DIR, FONT_LIST[choice if len(FONT_LIST) - 1 >= choice >= 0 else 0])
+    else:
+        font = choice
+    if not path.exists(font) and path.isfile(font):
+        return font, False
+    return font, True
+
+
+def initiate_font(choice, size=20):
+    font_path, exist = choose_font(choice)
+    if not exist:
+        print("字体文件不存在({})，请使用其他字体".format(font_path))
+        return None
+    try:
+        return ImageFont.truetype(font_path, size)
+    except IOError:
+        print("字体文件损坏({})，请使用其他字体".format(font_path))
+        return None
 
 
 def font_downloader(font_link, font_dir):
@@ -39,15 +80,13 @@ def font_downloader(font_link, font_dir):
     return True
 
 
-def font_handle(font_dir, fonts_url, show_prompt=True):
+def font_init(show_prompt=True):
     """
     字体下载管理，如果没有缺失字体依然执行，将提示重新下载所有字体
-    :param font_dir: 字体路径
-    :param fonts_url: 字体链接
     :param show_prompt: 显示提示信息
     :return:
     """
-    target = [fonts_url[f] for f in fonts_url if not os.path.exists(os.path.join(font_dir, f))]
+    target = [FONT_URL[f] for f in FONT_URL if not os.path.exists(os.path.join(FONT_DIR, f))]
     if not target:
         # 如果字体完整依然执行初始化，则提示删除原有字体目录
         if show_prompt:
@@ -62,22 +101,16 @@ def font_handle(font_dir, fonts_url, show_prompt=True):
                         return False
             except KeyboardInterrupt:
                 exit(0)
-        shutil.rmtree(font_dir)
-        target = fonts_url.values()
+        shutil.rmtree(FONT_DIR)
+        target = FONT_URL.values()
 
-    if not os.path.exists(font_dir):
+    if not os.path.exists(FONT_DIR):
         # 创建字体目录
-        os.makedirs(font_dir)
+        os.makedirs(FONT_DIR)
 
     print("Start Downloading {} fonts".format(len(target)))
     for font in target:
-        font_downloader(font, font_dir)
+        font_downloader(font, FONT_DIR)
 
     print("下载完成")
-
-
-if __name__ == '__main__':
-    from printer import painter
-    font_handle(painter.FONT_DIR, painter.FONT_URL, show_prompt=False)
-
 

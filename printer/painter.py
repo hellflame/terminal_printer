@@ -2,25 +2,12 @@
 import sys
 import random
 import subprocess
-from os import popen, path
+from os import popen
 
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw
 
+from printer.font_helper import initiate_font
 
-FONT_LIST = ['shuyan.ttf',
-             'letter.ttf',
-             'Haibaoyuanyuan.ttf',
-             'fengyun.ttf',
-             'huakangbold.otf']
-
-_font_prefix = "https://raw.githubusercontent.com/hellflame/terminal_printer/" \
-               "808004a7cd41b4383bfe6aa310c491c69d9b2556/fonts/"
-
-FONT_URL = {
-    f: _font_prefix + f for f in FONT_LIST
-}
-
-FONT_DIR = path.join(path.expanduser('~'), ".terminal_fonts")
 DEFAULT_SIZE = 50, 30  # width, height
 _SIZE_CMD = "stty size"
 
@@ -172,30 +159,9 @@ def text_drawer(text, fonts=None):
     """
     im = Image.new("1", (1, 1), 'white')  # 初始画布大小没有关系
     draw = ImageDraw.Draw(im)
-    if type(fonts) is int:
-        font = path.join(FONT_DIR, FONT_LIST[fonts if len(FONT_LIST) - 1 >= fonts >= 0 else 0])
-        # print(font)
-    elif fonts is None:
-        font = path.join(FONT_DIR, FONT_LIST[0])
-    else:
-        font = fonts
-
-    if not path.exists(font) and path.isfile(font):
-        print("字体文件不存在({})，请使用其他字体".format(font))
+    font = initiate_font(fonts, 20)
+    if not font:
         return None
-    try:
-        font = ImageFont.truetype(font, 20)
-    except IOError:
-        print("字体文件损坏，请使用其他字体")
-        return None
-    except:
-        target = path.join(FONT_DIR, FONT_LIST[0])
-        if path.exists(target):
-            font = ImageFont.truetype(target, 20)
-        else:
-            print("字体缺失，请初始化字体!")
-            return None
-
     text_size = draw.textsize(unicode(text), font=font)
     im = im.resize(text_size)
 

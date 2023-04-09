@@ -4,9 +4,8 @@ import os
 import argparse
 
 from printer.version import __url__
-from printer.painter import MESS_FILTERS, FONT_LIST, FONT_DIR, \
-    FONT_URL, make_terminal_img, text_drawer, get_img
-from printer.resource import font_handle
+from printer.painter import MESS_FILTERS, make_terminal_img, text_drawer, get_img
+from printer.font_helper import font_init, choose_font
 from printer.utils import print_version, print_debug
 
 __all__ = ['parser']
@@ -16,7 +15,7 @@ def command(args, parse):
     if args.debug:
         print_debug(args)
     if args.init:
-        font_handle(FONT_DIR, FONT_URL)
+        font_init()
     elif args.version:
         print_version()
     elif args.picture:
@@ -60,14 +59,10 @@ def parser():
         raise argparse.ArgumentTypeError("填充方式索引值应在1～{}之间".format(len(MESS_FILTERS) - 1))
 
     def usable_font(s):
-        if s.isdigit():
-            if 0 <= int(s) <= len(FONT_LIST) - 1:
-                return int(s)
-            raise argparse.ArgumentTypeError("字体若为数字，应在0～{}之间".format(len(FONT_LIST) - 1))
-        else:
-            if os.path.exists(s):
-                return s
+        f, exist = choose_font(s)
+        if not exist:
             raise argparse.ArgumentTypeError("字体路径不存在，请检查路径或使用数字")
+        return f
 
     basic = parse.add_argument_group("basics")
     basic.add_argument("-i", "--init", action="store_true", help="初始化程序，下载字体")
@@ -82,7 +77,7 @@ def parser():
     text.add_argument("-t", '--text', default="HellFlame", help="设置将要处理的文本内容，默认为 HellFlame")
     text.add_argument("-c", '--color', type=usable_color, metavar="i", help="设置颜色")
     text.add_argument("-g", '--gray', action="store_true", help="图像转换为灰度图(若指定图)")
-    text.add_argument("-F", '--font', metavar="path", type=usable_font, help="设置书写字体")
+    text.add_argument("-F", '--font', metavar="path", type=usable_font, default='0', help="设置书写字体")
     text.add_argument("-r", '--reverse', action="store_true", help="反色(对彩色输出无效)")
 
     common = parse.add_argument_group("common")
