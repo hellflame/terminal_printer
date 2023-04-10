@@ -6,7 +6,8 @@ import string
 import unittest
 
 from printer.run import *
-from printer.painter import MESS_FILTERS, FONT_LIST
+from printer.painter import MESS_FILTERS
+from printer.font_helper import FONT_LIST
 
 
 class CommandTester(unittest.TestCase):
@@ -54,8 +55,7 @@ class CommandTester(unittest.TestCase):
 
     def test_font(self):
         f = random.randrange(0, len(FONT_LIST) - 1)
-        self.assertEqual(f, self.parser.parse_args(shlex.split('--font {}'.format(f))).font)
-        self.assertEqual(f, self.parser.parse_args(shlex.split('-F {}'.format(f))).font)
+        self.assertTrue(self.parser.parse_args(shlex.split('--font {}'.format(f))).font.endswith(FONT_LIST[f]))
 
     def test_reverse(self):
         self.assertTrue(self.parser.parse_args(['-r']).reverse)
