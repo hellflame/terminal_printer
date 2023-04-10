@@ -48,8 +48,8 @@ def parser():
     def usable_color(s):
         _COLOR_MAP = {'black': 30, 'red': 31, 'green': 32, 'yellow': 33, 'blue': 34,
                       'magenta': 35, 'cyan': 36, 'white': 37}
-        for k, v in _COLOR_MAP.items():
-            _COLOR_MAP['bg-' + k] = v + 10
+        for k in tuple(_COLOR_MAP.keys()):
+            _COLOR_MAP['bg-' + k] = _COLOR_MAP[k] + 10
         if s.isdigit():
             if 30 <= int(s) <= 50:
                 return int(s)

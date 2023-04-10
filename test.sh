@@ -36,6 +36,8 @@ function test {
         if [ -x "`command -v python`" ]; then
             python2 --version
             command python2 -m test.run
+            python3 --version
+            command python3 -m test.run
             echo "----------"
 
         fi
