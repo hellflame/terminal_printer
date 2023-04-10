@@ -122,7 +122,9 @@ $ terminalprint -c [color]
 
 color值范围30～50，覆盖终端基本的16色
 
-也可以使用随机颜色，只要颜色值是一个非数字字符串即可
+可以使用部分颜色名称如：`red`, `black`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`
+
+也可以使用随机颜色，只要颜色值是一个非颜色名称的字符串即可
 
 ```bash
 $ terminalprint -c auto

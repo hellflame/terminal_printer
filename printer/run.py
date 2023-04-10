@@ -46,12 +46,14 @@ def parser():
                                            "更多帮助信息请参考: " + __url__)
 
     def usable_color(s):
+        _COLOR_MAP = {'black': 30, 'red': 31, 'green': 32, 'yellow': 33, 'blue': 34,
+                      'magenta': 35, 'cyan': 36, 'white': 37}
         if s.isdigit():
             if 30 <= int(s) <= 50:
                 return int(s)
             raise argparse.ArgumentTypeError("颜色值若为数字，应在30～50之间")
         else:
-            return s
+            return _COLOR_MAP.get(s, s)
 
     def usable_filter(s):
         if s.isdigit() and 1 <= int(s) <= len(MESS_FILTERS) - 1:

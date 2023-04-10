@@ -6,7 +6,7 @@ from os import popen
 
 from PIL import Image, ImageDraw
 
-from printer.font_helper import initiate_font
+from printer.font_helper import initiate_true_type
 
 DEFAULT_SIZE = 50, 30  # width, height
 _SIZE_CMD = "stty size"
@@ -115,14 +115,15 @@ def make_terminal_img(img, filter_type=None, width=None,
 
     if type(dye) is int:
         # 特定颜色绘制
-        result = '\033[01;{}m'.format(dye) + '\n'.join([''.join([render_pix(w, h) for w in range(width)])
-                                                        for h in range(height)])
+        result = '\033[01;{}m'.format(dye) + \
+                 '\n'.join([''.join([render_pix(w, h) for w in range(width)])
+                            for h in range(height)]) + '\033[00m'
     elif type(dye) is str:
         # 随机颜色绘制
         result = '\n'.join([''.join(["\033[01;{}m{}".format(random.randrange(30, 40),
                                                             render_pix(w, h))
                                      for w in range(width)])
-                            for h in range(height)])
+                            for h in range(height)]) + '\033[00m'
 
     else:
         # 黑白
@@ -130,7 +131,7 @@ def make_terminal_img(img, filter_type=None, width=None,
                                      for w in range(width)])
                             for h in range(height)])
     img.close()
-    return result + '\033[00m'
+    return result
 
 
 def get_img(file_path, gray=False):
@@ -159,7 +160,7 @@ def text_drawer(text, fonts=None):
     """
     im = Image.new("1", (1, 1), 'white')  # 初始画布大小没有关系
     draw = ImageDraw.Draw(im)
-    font = initiate_font(fonts, 20)
+    font = initiate_true_type(fonts, 20)
     if not font:
         return None
     text_size = draw.textsize(unicode(text), font=font)

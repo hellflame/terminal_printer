@@ -43,7 +43,7 @@ def choose_font(choice):
     return font, True
 
 
-def initiate_font(choice, size=20):
+def initiate_true_type(choice, size=20):
     font_path, exist = choose_font(choice)
     if not exist:
         print("字体文件不存在({})，请使用其他字体".format(font_path))
