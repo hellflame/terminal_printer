@@ -61,10 +61,7 @@ def make_terminal_img(img, filter_type=None, width=None,
         # 如果文字画布生成失败，img为空
         return ''
     if not keep_ratio:
-        if width is None or height is None:
-            img = img.resize(DEFAULT_SIZE)
-        else:
-            img = img.resize((width, height))
+        img = img.resize((width or DEFAULT_SIZE[0], height or DEFAULT_SIZE[1]))
     else:
         size = img.size
         if width is None or height is None:
