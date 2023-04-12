@@ -37,13 +37,11 @@ $ terminalprint -h
 得到类似输出:
 
 ```bash
-usage: run.py [-h] [-i] [-v] [--debug] [-kr] [-t TEXT] [-c i] [-g] [-F path]
-              [-r] [-W w] [-H h] [-f i]
-              [picture]
+usage: run.py [-h] [-i] [-v] [--debug] [-kr] [-t TEXT] [-c i] [-g] [-F path] [-r] [-W w] [-H h] [-f i] [picture]
 
 Terminal Printer
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
 
 basics:
@@ -65,14 +63,14 @@ text:
 common:
   -W w, --width w       设置输出宽度，需要与高度一起设置
   -H h, --height h      设置输出高度，需要与宽度一起设置
-  -f i, --filter i      设置打印填充方式
+  -f i, --filter i      设置打印填充方式，输入单个字符或索引值，默认为 i
 
 首次进行文字处理
 需要执行 terminalprint -i 初始化或指定字体
 更多帮助信息请参考: https://github.com/hellflame/terminal_printer
 ```
 
-> v2.1.0 新增 `--debug` 参数，可与其他命令一起使用，输出调试信息
+> `v2.1.0` 新增 `--debug` 参数，可与其他命令一起使用，输出调试信息
 
 #### ii. 版本信息
 
@@ -111,6 +109,8 @@ $ terminalprint -f [filt_char]
 ```
 
 可以设置的值范围1～223，代表ANSI可打印字符索引
+
+> `v2.3.0` 之后的版本支持输入单个字符直接作为填充字符
 
 (2) 渲染颜色
 

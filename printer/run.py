@@ -58,9 +58,11 @@ def parser():
             return _COLOR_MAP.get(s, s)
 
     def usable_filter(s):
+        if len(s) == 1 and s in MESS_FILTERS:
+            return MESS_FILTERS.index(s)
         if s.isdigit() and 1 <= int(s) <= len(MESS_FILTERS) - 1:
             return int(s)
-        raise argparse.ArgumentTypeError("填充方式索引值应在1～{}之间".format(len(MESS_FILTERS) - 1))
+        raise argparse.ArgumentTypeError("填充方式为单个字符或索引值在1～{}之间".format(len(MESS_FILTERS) - 1))
 
     def usable_font(s):
         f, exist = choose_font(s)
@@ -87,7 +89,8 @@ def parser():
     common = parse.add_argument_group("common")
     common.add_argument('-W', "--width", metavar="w", type=int, help="设置输出宽度，需要与高度一起设置")
     common.add_argument('-H', "--height", metavar="h", type=int, help="设置输出高度，需要与宽度一起设置")
-    common.add_argument("-f", '--filter', type=usable_filter, metavar="i", default=73, help="设置打印填充方式")
+    common.add_argument("-f", '--filter', type=usable_filter, metavar="i",
+                        default='i', help="设置打印填充方式，输入单个字符或索引值，默认为 i")
 
     # 可选的位置参数
     return parse.parse_args(), parse
