@@ -1,4 +1,5 @@
 import os
+import sys
 import platform
 
 from printer.version import __version__
@@ -12,6 +13,7 @@ def print_version():
 
 def print_debug(args):
     print_version()
+    print("Interpreter: {}".format(sys.executable))
     print("Shell: {}".format(os.getenv("SHELL")))
     print("Term: {}".format(os.getenv("TERM")))
     print("Platform: {}".format("/".join(platform.uname())))
