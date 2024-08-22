@@ -29,6 +29,13 @@ except AttributeError:  # python2
     except:
         pass
 
+get_text_size = getattr(ImageDraw.ImageDraw, 'textsize', None)
+if not get_text_size:
+    # for pillow version >= 10.0.0
+    def get_text_size(self, txt, font):
+        _, _, x, y = ImageDraw.ImageDraw.textbbox(self, (0, 0), txt, font)
+        return x, y
+
 
 class ImageMap(object):
     def __init__(self):
@@ -160,10 +167,11 @@ def text_drawer(text, fonts=None):
     font = initiate_true_type(fonts, 20)
     if not font:
         return None
-    text_size = draw.textsize(unicode(text), font=font)
+    txt = unicode(text)
+    text_size = get_text_size(draw, txt, font=font)
     im = im.resize(text_size)
 
     draw = ImageDraw.Draw(im)
-    draw.text((0, 0), unicode(text), font=font)
+    draw.text((0, 0), txt, font=font)
     return im
 
