@@ -1,4 +1,5 @@
 
 __author__ = 'hellflame'
-__version__ = '2.3.1'
+__project__ = 'TerminalPrinter'
+__version__ = '2.3.2'
 __url__ = 'https://github.com/hellflame/terminal_printer'
