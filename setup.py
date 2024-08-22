@@ -1,12 +1,12 @@
 # coding=utf8
 
 from setuptools import setup
-from printer.version import __version__, __author__, __url__
+from printer.version import __version__, __author__, __url__, __project__
 
 setup(
-    name='TerminalPrinter',
+    name=__project__,
     version=__version__,
-    keywords=('字符画', '终端打印'),
+    keywords=['字符画', '终端打印'],
     description="终端图片、文字生成器",
     license='MIT',
     author=__author__,
